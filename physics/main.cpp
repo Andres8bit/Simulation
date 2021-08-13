@@ -1,10 +1,10 @@
 #include <iostream>
-#include "collisions.h"
+#include "engine.h"
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-    Collisions test;
+    Engine test;
     cout << "Hello World!" << endl;
     return 0;
 }

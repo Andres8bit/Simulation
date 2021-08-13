@@ -6,7 +6,8 @@ CONFIG -= qt
 SOURCES += main.cpp \
     collisions.cpp \
     engine.cpp \
-    spring.cpp
+    spring.cpp \
+    sphere.cpp
 
 HEADERS += \
     sphere.h \
