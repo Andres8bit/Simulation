@@ -23,10 +23,6 @@ Engine::~Engine()
 	delete[] this->objects;
 }
 
-
-void runge_kutta(Obj*& x, force f, const double& h, const size_t& n) {
-	
-}
 void Engine::runge_kutta_system(const Vec& f, Obj*& x, const double& step_size,const double& steps) {
 	// init 2d dynamic array. Each row serces as order
 	Obj** K = new Obj*[4]; 
@@ -50,7 +46,6 @@ void Engine::runge_kutta_system(const Vec& f, Obj*& x, const double& step_size,c
 		// 4th order setup:
 		applyForces(K[3]);
 	}
-
 
 }
 
@@ -92,38 +87,14 @@ void Engine::vis(Obj*& x) {
 
 }
 
-void Engine::vel(Obj*& x,const double& t) {
+Vec Engine::vel(const Vec& x,const double& t) {
 	Vec vel;
-	vel.x = x->get_vel().x + x->get_acc().x *t;
-	vel.y = x->get_vel().y + x->get_acc().y *t;
-	x->set_vel(vel);
+	vel.x = x.x + x.x *t;
+	vel.y = x.y + x.y *t;
+	return vel;
 }
 
-void Engine::accel(Obj*& x,const double& t) {
-
-
-}
-
-
-// solves ODE where:
-//			f = dx/dt -> f(x,t) 
-//			h = step_size 
-//			n = number of steps
-//			x = Vec -> init vector. 
-//			returns approximate solution as vec
-Vec Engine::rk4(const Vec& x, const force f,const double& t, const double& h, const size_t& n) {
-	Vec k1,k2,k3,k4,sum;
-	Vec y = x;
-
-	for (int i = 0; i < n; i++) {
-		k1 = f(y, t).scalar_mutl(h);
-		k2 = f(y + k1.scalar_mutl(0.5),t + 0.5*h).scalar_mutl(h);
-		k3 = f(y + k2.scalar_mutl(0.5), t + 0.5 * h).scalar_mutl(h);
-		k4 = f(y + k3, t + h).scalar_mutl(h);
-		sum = k1 + k2.scalar_mutl(2) + k3.scalar_mutl(2) + k4;
-		sum = sum.scalar_mutl(1 / 6);
-		y = y + sum;
-	}
-
-	return y;
+Vec Engine::accel(const Vec& x,const double& t) {
+	Vec acc;
+	return acc;
 }

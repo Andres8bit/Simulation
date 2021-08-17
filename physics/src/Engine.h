@@ -20,10 +20,9 @@ private:
 	void G(Obj*&x);
 	void frict(Obj*& x,const double &t);
 	void vis(Obj*& x);
-	void vel(Obj*& x,const double& t);
-	void accel(Obj*& x,const double& t);
+	Vec vel(const Vec& x,const double& t);
+	Vec accel(const Vec& x,const double& t);
 	Vec sum_const_force();
-	Vec rk4(const Vec& x,const force f,const double& t, const double& h, const size_t& n);
 	void runge_kutta(Obj*& x, const Vec& f, const double& h, const size_t& n);
 	void runge_kutta_system(const Vec& f,Obj*& x, const double& step_size, const double& steps);
 };
