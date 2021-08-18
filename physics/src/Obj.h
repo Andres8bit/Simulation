@@ -3,11 +3,9 @@
 enum class TYPE {SPHERE, TRIANGLE, PLANE };
 class Obj {
 public:
-    Obj(double objmass = 0.01)
-    {
-        this->mass = objmass; this->vel = Vec(); this->acc = Vec();
-    }
-    ~Obj() { this->mass = 0.0; }
+     Obj() {}
+    ~Obj() {}
+     
 
     void step(double t) {}
     //getters:
@@ -21,7 +19,8 @@ public:
     void set_vel(Vec val) { this->vel = val; }
     void set_acc(Vec val) { this->acc = val; }
     void set_type(TYPE val) { this->t = val; }
-    virtual void apply_force(Vec& f) {};
+    virtual void apply_force(Vec::force f,const double& time) {};
+    virtual void copy(Obj*) {};
 private:
     double mass;
     Vec vel;
@@ -29,4 +28,3 @@ private:
     TYPE t;
 };
 
-typedef Vec (*force)(const Vec&,const double&);

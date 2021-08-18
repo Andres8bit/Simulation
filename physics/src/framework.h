@@ -5,7 +5,7 @@
 #pragma once
 
 #include "targetver.h"
-//#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
 #include <windows.h>
 // C RunTime Header Files
@@ -13,9 +13,8 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-#include "sphere.h"
+#include "Obj.h"
+#include "Sphere.h"
 #include "Triangle.h"
 #include "Plane.h"
-#include "obj.h"
-#include "collision.h"
-#include "Engine.h"
+#include "MainWindow.h"

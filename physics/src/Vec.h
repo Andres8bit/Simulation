@@ -21,14 +21,14 @@ struct Vec
            { return Vec(this->x + y.x, this->y + y.y);}
 
     // solves ODE where:
-   //			f = dx/dt -> f(x,t) 
-   //			h = step_size 
-   //			n = number of steps
-   //			x = Vec -> init vector. 
-   //			returns approximate solution as vec
-    Vec rk4(const Vec& x, const force f, const double& t, const double& h, const size_t& n) {
+//			f = dx/dt -> f(x,t) 
+//			h = step_size 
+//			n = number of steps
+//			x = Vec -> init vector. 
+//			returns approximate solution as vec
+    Vec rk4(const Vec::force f, const double& t, const double& h, const size_t& n) {
         Vec k1, k2, k3, k4, sum;
-        Vec y = x;
+        Vec y = Vec(this->x,this->y);
 
         for (int i = 0; i < n; i++) {
             k1 = f(y, t).scalar_mutl(h);
@@ -42,4 +42,8 @@ struct Vec
         }
         return y;
     }
+
 };
+
+
+

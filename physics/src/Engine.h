@@ -1,21 +1,27 @@
 #pragma once
-#include "collision.h"
+#include"Collision.h"
+#include"Obj.h"
+#include <iostream>
 
+#include<Windows.h>
 
 class Engine
 {
 public:
 	Engine();
 	~Engine();
+	void step();
+	void add(Sphere s);
 private:
 	double time;
-	Obj* objects;
+	Sphere* objects;
 	size_t capacity; // total number of objects the engine has room for currently
 	size_t obj_count; // number of objs in the scene
 	size_t force_count; // number of constant forces acting throughout the scene
 	Vec* forces; // 2D vector pointer to serve as dynamic array of  force vectors for vectors fields 
 	             //i.e Gravity, Air Drag, Viscous fluids
 
+	void resize();
 	void applyForces(Obj*& k);
 	void G(Obj*&x);
 	void frict(Obj*& x,const double &t);

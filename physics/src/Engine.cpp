@@ -1,4 +1,5 @@
 #include "Engine.h"
+
 //init all forces and objects in current scene:
 //   For assume Earth model with constant forces G = (0,9.8) -> positive because we want y = 0 to be the sky
 //
@@ -7,7 +8,7 @@ Engine::Engine()
 	this->capacity = 10;
 	this->obj_count = 0;
 	this->force_count = 1;
-	this->objects = new Obj[capacity];
+	this->objects = new Sphere[capacity];
 	this->forces = new Vec[capacity];
 
 	//init Gravitationoal force on earth. Newtonian Model
@@ -21,6 +22,9 @@ Engine::~Engine()
 	//deallocate memory
 	delete[] this->forces;
 	delete[] this->objects;
+}
+void Engine::step() {
+	//appy forces to each object
 }
 
 void Engine::runge_kutta_system(const Vec& f, Obj*& x, const double& step_size,const double& steps) {
@@ -50,15 +54,8 @@ void Engine::runge_kutta_system(const Vec& f, Obj*& x, const double& step_size,c
 }
 
 void Engine::applyForces(Obj*& k) {
-	Vec fields = this->sum_const_force();
 
-	// For each object apply the forces within the scene:
-	for (size_t i = 0; i < this->obj_count; i++) {
-		// call overridden virtual function apply force.
-		// this allows each pointer to call the appropriate
-		// apply_force method.
-		k[i].apply_force(fields);
-	}
+	
 }
 
 Vec Engine::sum_const_force() {
@@ -97,4 +94,21 @@ Vec Engine::vel(const Vec& x,const double& t) {
 Vec Engine::accel(const Vec& x,const double& t) {
 	Vec acc;
 	return acc;
+}
+
+void Engine::add(Sphere s) {
+	Sphere* temp  = new Sphere(s);
+	if (obj_count < capacity) {
+		(objects[obj_count]) = *temp;
+		obj_count++;
+	
+		std::cout << "added" << std::endl;
+	}else {
+		this->resize();
+	}
+
+}
+
+void Engine::resize() {
+
 }
