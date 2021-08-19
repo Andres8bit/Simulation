@@ -24,7 +24,9 @@ Engine::~Engine()
 	delete[] this->objects;
 }
 void Engine::step() {
-	//appy forces to each object
+	for (int i = 0; i < this->obj_count; i++) {
+		
+	}
 }
 
 void Engine::runge_kutta_system(const Vec& f, Obj*& x, const double& step_size,const double& steps) {
@@ -93,6 +95,8 @@ Vec Engine::vel(const Vec& x,const double& t) {
 
 Vec Engine::accel(const Vec& x,const double& t) {
 	Vec acc;
+	acc.x = 0;
+	acc.y = 9.8;
 	return acc;
 }
 
