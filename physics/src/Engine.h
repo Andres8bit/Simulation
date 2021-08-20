@@ -1,9 +1,9 @@
-#pragma once
 #include"Collision.h"
-#include"Obj.h"
 #include <iostream>
-
+#include "Vec.h"
 #include<Windows.h>
+#pragma once
+
 
 class Engine
 {
@@ -27,8 +27,9 @@ private:
 	void frict(Obj*& x,const double &t);
 	void vis(Obj*& x);
 	Vec vel(const Vec& x,const double& t);
-	Vec accel(const Vec& x,const double& t);
+	void earth_gravity_accel(Obj& obj);
 	Vec sum_const_force();
+
 	void runge_kutta(Obj*& x, const Vec& f, const double& h, const size_t& n);
 	void runge_kutta_system(const Vec& f,Obj*& x, const double& step_size, const double& steps);
 };

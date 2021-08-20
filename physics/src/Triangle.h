@@ -9,7 +9,6 @@ public:
     }
     ~Triangle() { this->a = this->b = this->c = Vec(); }
     void step_position();
-    void apply_force(Vec::force f,const double& time);
     void step_orientation();
 private:
     Vec a;

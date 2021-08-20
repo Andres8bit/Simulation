@@ -9,7 +9,8 @@ public:
     }
     ~Plane() { this->ur = this->ul = this->lr = this->ll = Vec(); }
 
-
+    void step_position();
+    void step_orientation();
 
 private:
     Vec ur;

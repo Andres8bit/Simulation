@@ -25,7 +25,7 @@ Engine::~Engine()
 }
 void Engine::step() {
 	for (int i = 0; i < this->obj_count; i++) {
-		
+		this->earth_gravity_accel(objects[i]);
 	}
 }
 
@@ -93,12 +93,12 @@ Vec Engine::vel(const Vec& x,const double& t) {
 	return vel;
 }
 
-Vec Engine::accel(const Vec& x,const double& t) {
-	Vec acc;
-	acc.x = 0;
-	acc.y = 9.8;
-	return acc;
+void Engine::earth_gravity_accel(Obj& obj) {
+	double h = this->time / 10;
+	double n = 10;
+	obj.set_acc(rk4(obj.get_acc(), earth_grav, this->time, h, n));
 }
+
 
 void Engine::add(Sphere s) {
 	Sphere* temp  = new Sphere(s);

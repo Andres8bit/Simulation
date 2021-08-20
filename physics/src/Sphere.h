@@ -1,36 +1,27 @@
 #pragma once
+#include <d2d1.h>
+#pragma comment(lib, "d2d1")
 #include"obj.h"
 class Sphere : public Obj {
 public:
-    Sphere(const Sphere& s) { copy(s); }
-    Sphere(Vec center, double radius = 0.5)
-    {
-        this->center = center; this->r = radius; this->set_type(TYPE::SPHERE);
-    }
-    Sphere(double xpos = 0.0, double ypos = 0.0, double radius = 0.5)
-    {
-        this->center.x = xpos; this->center.y = ypos; this->r = radius; this->set_type(TYPE::SPHERE);
-    }
-    ~Sphere() { this->center.x = this->center.y = 0; }
-
-    Vec get_center()const { return this->center; }
-    double get_radius()const { return this->r; }
-    void set_center(Vec pos) { this->center = center; }
-
+    Sphere(const Sphere& s);
+    Sphere(Vec center, double radius = 0.5);
+    Sphere(double xpos = 0.0, double ypos = 0.0, double radius = 0.5);
+    ~Sphere();
+    Vec get_center()const { return Vec(this->ellipse.point.x,this->ellipse.point.y); }
+    double get_radius()const { return this->ellipse.radiusX; }
+    void set_center(Vec pos) { this->ellipse.point.x = pos.x; this->ellipse.point.y = pos.y; }
     void step_position();
-    void apply_force(Vec::force f, const double& time);
     void step_orientation();
-
-    void copy(Obj* obj) {
-        Sphere* temp = (Sphere*) &obj;
-        this->copy(temp);
-    }
 private:
-    Vec center;
-    double r;
+    D2D1_ELLIPSE ellipse;
+    D2D1_COLOR_F color;
 
     void copy(const Sphere& s) {
-        this->center = s.get_center();
-        this->r = s.get_radius();
+        Vec center(s.get_center());
+        this->ellipse.point.x = center.x;
+        this->ellipse.point.y = center.y;
+        this->ellipse.radiusX = this->ellipse.radiusY = s.get_radius();
+        this->set_type(s.get_type());
     }
 };
