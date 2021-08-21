@@ -1,11 +1,13 @@
+#include"Vec.h"
 #pragma once
-#include "Vec.h"
 
-enum class TYPE {SPHERE, TRIANGLE, PLANE };
+enum class TYPE { SPHERE, TRIANGLE, PLANE };
 class Obj {
 public:
     Obj();
+    Obj(const Obj& x);
     ~Obj();
+
     void step(double t) {}
     //getters:
     double get_mass()const { return this->mass; }
@@ -19,9 +21,9 @@ public:
     void set_acc(Vec val) { this->acc = val; }
     void set_type(TYPE val) { this->t = val; }
 private:
+    void copy(const Obj& x);
     double mass;
     Vec vel;
     Vec acc;
     TYPE t;
 };
-

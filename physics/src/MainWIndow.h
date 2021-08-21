@@ -1,11 +1,6 @@
-#include <windows.h>
-#include<windowsx.h>
-#include<WinUser.h>
-#include <d2d1.h>
-#pragma comment(lib, "d2d1")
-#include "basewin.h"
-#include "Engine.h"
 #pragma once
+#include "framework.h"
+
 class DPIScale
 {
     static float scaleX;
@@ -15,7 +10,7 @@ public:
     static void Initialize(HWND hwnd)
     {
         FLOAT dpiX, dpiY;
-       // LogicalDpi{ get; }
+        // LogicalDpi{ get; }
         auto x = GetDpiForWindow(hwnd);
         scaleX = x / 96.0f;
         scaleY = x / 96.0f;
@@ -44,14 +39,12 @@ template <class T> void SafeRelease(T** ppT)
 class MainWindow : public BaseWindow<MainWindow>
 {
 private:
-    // Physics Engine:
-    Engine engine;
     // Factory Pointer
-    ID2D1Factory*          pFactory;
+    ID2D1Factory* pFactory;
     // Poionter to interface that represents render target.
     ID2D1HwndRenderTarget* pRenderTarget;
     // Pointer to interface that represents the brush.
-    ID2D1SolidColorBrush*  pBrush;
+    ID2D1SolidColorBrush* pBrush;
     // Ellipse pointer
     D2D1_ELLIPSE           ellipse;
     // Mouse Pointer
@@ -73,8 +66,8 @@ private:
 public:
 
     MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
-                   ellipse(D2D1::Ellipse(D2D1::Point2F(),0,0)),
-                   ptMouse(D2D1::Point2F())
+        ellipse(D2D1::Ellipse(D2D1::Point2F(), 0, 0)),
+        ptMouse(D2D1::Point2F())
     {
     }
 
@@ -240,10 +233,9 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         if (wParam & 0x20) {
             swprintf_s(msg, L"WM_KEYDOWN: 0x%x\n", wParam);
             OutputDebugString(msg);
-            engine.step();
+    
         }
 
-        
         return 0;
     }
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
@@ -258,7 +250,7 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags) {
 
 void MainWindow::OnLButtonUp()
 {
-    ReleaseCapture(); 
+    ReleaseCapture();
 }
 void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
 {
@@ -271,13 +263,10 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
         const float height = (dips.y - ptMouse.y) / 2;
         const float x1 = ptMouse.x + radius;
         const float y1 = ptMouse.y + radius;
-        Sphere new_obj(x1, y1, radius);
-        engine.add(new_obj);
         ellipse = D2D1::Ellipse(D2D1::Point2F(x1, y1), radius, radius);
-      
+
 
         InvalidateRect(m_hwnd, NULL, FALSE);
     }
 }
-
 

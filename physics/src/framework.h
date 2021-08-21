@@ -13,8 +13,11 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include"Vec.h"
+#include"Physics_sim.h"
 #include "Obj.h"
-#include "Sphere.h"
-#include "Triangle.h"
-#include "Plane.h"
-#include "MainWindow.h"
+#include "BaseWindow.h"
+#include<windowsx.h>
+#include<WinUser.h>
+#include <d2d1.h>
+#pragma comment(lib, "d2d1")
