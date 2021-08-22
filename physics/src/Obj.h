@@ -1,6 +1,7 @@
 #include"Vec.h"
 #pragma once
 
+
 enum class TYPE { SPHERE, TRIANGLE, PLANE };
 class Obj {
 public:
@@ -20,6 +21,7 @@ public:
     void set_vel(Vec val) { this->vel = val; }
     void set_acc(Vec val) { this->acc = val; }
     void set_type(TYPE val) { this->t = val; }
+  
 private:
     void copy(const Obj& x);
     double mass;

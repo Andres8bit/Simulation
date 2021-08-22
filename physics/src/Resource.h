@@ -1,6 +1,10 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by Physics_sim.rc
+#define IDR_ACCEL1              101
+#define ID_TOGGLE_MODE          40002
+#define ID_DRAW_MODE            40003
+#define ID_SELECT_MODE          40004
 
 #define IDS_APP_TITLE			103
 

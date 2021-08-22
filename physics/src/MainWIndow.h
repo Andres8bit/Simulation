@@ -1,6 +1,16 @@
 #pragma once
 #include "framework.h"
 
+
+template <class T> void SafeRelease(T** ppT)
+{
+    if (*ppT)
+    {
+        (*ppT)->Release();
+        *ppT = NULL;
+    }
+}
+
 class DPIScale
 {
     static float scaleX;
@@ -8,6 +18,7 @@ class DPIScale
 
 public:
     static void Initialize(HWND hwnd)
+
     {
         FLOAT dpiX, dpiY;
         // LogicalDpi{ get; }
@@ -21,24 +32,42 @@ public:
     {
         return D2D1::Point2F(static_cast<float>(x) / scaleX, static_cast<float>(y) / scaleY);
     }
+
+    template <typename T>
+   static  float PixelsToDipsX(T x)
+    {
+        return static_cast<float>(x) / scaleX;
+    }
+
+    template <typename T>
+    static float PixelsToDipsY(T y)
+    {
+        return static_cast<float>(y) / scaleY;
+    }
+
 };
 
 
 float DPIScale::scaleX = 1.0f;
 float DPIScale::scaleY = 1.0f;
 
-template <class T> void SafeRelease(T** ppT)
-{
-    if (*ppT)
-    {
-        (*ppT)->Release();
-        *ppT = NULL;
-    }
-}
-
+D2D1::ColorF::Enum colors[] = { D2D1::ColorF::Yellow, D2D1::ColorF::Salmon, D2D1::ColorF::LimeGreen };
 class MainWindow : public BaseWindow<MainWindow>
 {
 private:
+    enum Mode {
+        DrawMode,
+        SelectMode,
+        DragMode
+    };
+
+    Mode mode;
+    size_t nextColor;
+    HCURSOR hCursor;
+    // List of Spheres in scene
+    std::list<std::shared_ptr<Sphere>> spheres;
+    // list of selectio iterators.
+    std::list<std::shared_ptr<Sphere>>::iterator selection;
     // Factory Pointer
     ID2D1Factory* pFactory;
     // Poionter to interface that represents render target.
@@ -50,7 +79,19 @@ private:
     // Mouse Pointer
     D2D1_POINT_2F          ptMouse;
 
+    std::shared_ptr<Sphere> Selection() {
+        if (selection == spheres.end()) {
+            return nullptr;
+        }
+        else {
+            return(*selection);
+        }
+    }
 
+    void ClearSelection() { selection = spheres.end(); }
+    HRESULT InsertSphere(float x, float y);
+    
+    BOOL HitTest(float x, float y);
     void    CalculateLayout();
     HRESULT CreateGraphicsResources();
     void    DiscardGraphicsResources();
@@ -59,15 +100,15 @@ private:
     void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
     void OnLButtonUp();
     void OnMouseMove(int pixelX, int pixelY, DWORD flags);
-    void onSpaceDown();
+    void onSpaceDown(); 
+    void SetMode(Mode m);
 
 
 
 public:
 
     MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
-        ellipse(D2D1::Ellipse(D2D1::Point2F(), 0, 0)),
-        ptMouse(D2D1::Point2F())
+        ptMouse(D2D1::Point2F()), nextColor(0), selection(spheres.end())
     {
     }
 
@@ -75,12 +116,65 @@ public:
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
+
+void MainWindow::SetMode(Mode m)
+{
+    mode = m;
+
+    LPWSTR cursor = NULL;
+    switch (mode)
+    {
+    case DrawMode:
+        cursor = IDC_CROSS;
+        break;
+
+    case SelectMode:
+        cursor = IDC_HAND;
+        break;
+
+    case DragMode:
+        cursor = IDC_SIZEALL;
+        break;
+    }
+
+    hCursor = LoadCursor(NULL, cursor);
+    SetCursor(hCursor);
+}
 // Recalculate drawing layout when the size of the window changes.
 void MainWindow::CalculateLayout()
 {
 
 }
+HRESULT MainWindow::InsertSphere(float x, float y) {
+    try
+    {
+        selection = spheres.insert(
+            spheres.end(),
+            std::shared_ptr<Sphere>(new Sphere())
+        );
+        ptMouse = D2D1::Point2F(x, y);
+        Selection()->set_center(Vec(x,y));
+        Selection()->set_raduis(2.0f);
+        Selection()->set_color(D2D1::ColorF(colors[nextColor]));
 
+        nextColor = (nextColor + 1) % ARRAYSIZE(colors);
+    }
+    catch (std::bad_alloc)
+    {
+        return E_OUTOFMEMORY;
+    }
+    return S_OK;
+}
+
+BOOL MainWindow::HitTest(float x, float y) {
+    for (auto i = spheres.rbegin(); i != spheres.rend(); ++i) {
+        if ((*i)->HitTest(x, y)) {
+            selection = (++i).base();
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
 // Creates pRenderTager and pBrush interfaces pointers.
 HRESULT MainWindow::CreateGraphicsResources()
 {
@@ -142,8 +236,15 @@ void MainWindow::OnPaint()
         pRenderTarget->BeginDraw();
         //fills whole render with a single color.
         pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
-        //drawas a filled ellipse.
-        pRenderTarget->FillEllipse(ellipse, pBrush);
+        
+        for (auto i = spheres.begin(); i != spheres.end(); ++i) {
+            (*i)->Draw(pRenderTarget, pBrush);
+        }
+        if (Selection()) {
+            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+            pRenderTarget->DrawEllipse(Selection()->get_ui(), pBrush, 2.0f);
+        }
+      
         //signals the end of drawing.
         hr = pRenderTarget->EndDraw(); // returns failure or success of rendering.
         if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
@@ -242,31 +343,63 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags) {
-    SetCapture(m_hwnd);
-    ellipse.point = ptMouse = DPIScale::PixelsToDips(pixelX, pixelY);
-    ellipse.radiusX = ellipse.radiusY = 1.0f;
+    const float dipX = DPIScale::PixelsToDipsX(pixelX);
+    const float dipY = DPIScale::PixelsToDipsY(pixelY);   
+
+    if (mode == DrawMode) {
+        POINT pt = { pixelX, pixelY };
+
+        if (DragDetect(m_hwnd, pt)) {
+            SetCapture(m_hwnd);
+            InsertSphere(dipX, dipY);
+        }
+    }
+    else {
+        ClearSelection();
+        if (HitTest(dipX, dipY)) {
+            SetCapture(m_hwnd);
+            Vec pos = Selection()->get_center();
+            ptMouse = D2D1::Point2F(pos.x, pos.y);
+            ptMouse.x -= dipX;
+            ptMouse.y -= dipY;
+
+            SetMode(DragMode);
+        }
+    }
     InvalidateRect(m_hwnd, NULL, FALSE);
 }
 
 void MainWindow::OnLButtonUp()
 {
+    if ((mode == DrawMode) && Selection()) {
+        ClearSelection();
+        InvalidateRect(m_hwnd, NULL, FALSE);
+    }
+    else if (mode == DragMode) {
+        SetMode(SelectMode);
+    }
     ReleaseCapture();
 }
 void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
 {
-    if (flags & MK_LBUTTON)
+    const float dipX = DPIScale::PixelsToDipsX(pixelX);
+    const float dipY = DPIScale::PixelsToDipsY(pixelY);
+    
+    if ((flags & MK_LBUTTON) && Selection())
     {
+        if (mode == DrawMode) {
+            const float width = (dipX - ptMouse.x) / 2;
+            const float height = (dipY - ptMouse.y) / 2;
+            const float x1 = ptMouse.x + width;
+            const float y1 = ptMouse.y + height;
 
-        const D2D1_POINT_2F dips = DPIScale::PixelsToDips(pixelX, pixelY);
-
-        const float radius = (dips.x - ptMouse.x) / 2;
-        const float height = (dips.y - ptMouse.y) / 2;
-        const float x1 = ptMouse.x + radius;
-        const float y1 = ptMouse.y + radius;
-        ellipse = D2D1::Ellipse(D2D1::Point2F(x1, y1), radius, radius);
-
-
-        InvalidateRect(m_hwnd, NULL, FALSE);
+            Selection()->set_center(Vec(x1, y1)); 
+            Selection()->set_raduis(width);
+        }
+        else if (mode == DragMode) {
+            Selection()->set_center(Vec(dipX + double(ptMouse.x), dipY + double(ptMouse.y)));
+        }
+       InvalidateRect(m_hwnd, NULL, FALSE);
     }
 }
 

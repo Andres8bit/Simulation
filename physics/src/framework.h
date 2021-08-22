@@ -18,6 +18,11 @@
 #include "Obj.h"
 #include "BaseWindow.h"
 #include<windowsx.h>
+#include"Sphere.h"
 #include<WinUser.h>
+#include <memory.h>
+#include <list>
+#include <iostream>
 #include <d2d1.h>
 #pragma comment(lib, "d2d1")
+
