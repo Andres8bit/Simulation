@@ -1,31 +1,34 @@
 #include"Vec.h"
 #pragma once
-
+#include <d2d1.h>
+#include<WinUser.h>
+#pragma comment(lib, "d2d1")
 
 enum class TYPE { SPHERE, TRIANGLE, PLANE };
 class Obj {
 public:
-    Obj();
+    Obj() {};
     Obj(const Obj& x);
     ~Obj();
 
-    void step(double t) {}
+ 
     //getters:
-    double get_mass()const { return this->mass; }
-    TYPE get_type()const { return this->t; }
-    Vec get_vel()const { return this->vel; }
-    Vec get_acc()const { return this->acc; }
+    virtual double get_mass()const {};
+    virtual TYPE get_type()const {};
+    virtual Vec get_vel()const {};
+    virtual Vec get_acc()const {};
 
     //setter:
-    void set_mass(double val) { this->mass = val; }
-    void set_vel(Vec val) { this->vel = val; }
-    void set_acc(Vec val) { this->acc = val; }
-    void set_type(TYPE val) { this->t = val; }
+    virtual void apply_force(Vec::force f) {};
+    virtual void set_mass(double val) {};
+    virtual void set_vel(Vec val) {};
+    virtual void set_acc(Vec val) {};
+    virtual  void set_type(TYPE val) {};
+
+    virtual void set_color(D2D1::ColorF color) {};
+    virtual void Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {};
+    virtual BOOL HitTest(float x, float y) {};
   
 private:
-    void copy(const Obj& x);
-    double mass;
-    Vec vel;
-    Vec acc;
-    TYPE t;
+    virtual void copy(const Obj& x) {};
 };

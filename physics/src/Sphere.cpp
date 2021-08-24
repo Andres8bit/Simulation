@@ -29,12 +29,18 @@ void Sphere::step_position() {
 
 void Sphere::step_orientation() {
 }
+
+void Sphere::apply_force(Vec::force f) {
+
+}
+
 void Sphere::Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
 	pBrush->SetColor(color);
 	pRT->FillEllipse(ui, pBrush);
 	pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 	pRT->DrawEllipse(ui, pBrush, 1.0f);
 }
+
 BOOL Sphere:: HitTest(float x, float y) {
 	const float a = ui.radiusX;
 	const float b = ui.radiusY;
