@@ -3,9 +3,9 @@
 
 class Sphere:public Obj{
 private:
+    void copy(const Sphere& s);
     D2D1_ELLIPSE    ui;
     D2D1_COLOR_F    color;
-    void copy(const Sphere& s);
     Vec acc;
     Vec vel;
     double mass;
