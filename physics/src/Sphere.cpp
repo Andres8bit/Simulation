@@ -1,5 +1,4 @@
 #include "Sphere.h"
-
 Sphere::Sphere(const Sphere& s) {
 	copy(s);
 }
@@ -9,6 +8,7 @@ Sphere::Sphere(Vec center, double radius) {
 	ui.point.y = center.y;
 	ui.radiusX = ui.radiusY = radius;
 	set_type(TYPE::SPHERE);
+	color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 
 Sphere::Sphere(double xpos, double ypos, double radius) {
@@ -16,6 +16,7 @@ Sphere::Sphere(double xpos, double ypos, double radius) {
 	ui.point.y = ypos;
 	ui.radiusX = ui.radiusY = radius;
 	set_type(TYPE::SPHERE);
+	color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 Sphere::~Sphere()
 {
@@ -30,17 +31,15 @@ void Sphere::step_position() {
 void Sphere::step_orientation() {
 }
 
-void Sphere::apply_force(Vec::force f) {
-
-}
-
 void Sphere::Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
 	pBrush->SetColor(color);
 	pRT->FillEllipse(ui, pBrush);
-	pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 	pRT->DrawEllipse(ui, pBrush, 1.0f);
 }
 
+void Sphere::Redraw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
+	pRT->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
+}
 BOOL Sphere:: HitTest(float x, float y) {
 	const float a = ui.radiusX;
 	const float b = ui.radiusY;
@@ -56,6 +55,8 @@ void Sphere::copy(const Sphere& s){
 	ui.point.x = center.x;
 	ui.point.y = center.y;
 	ui.radiusX = ui.radiusY = r;
+	//need to add get color function.
+	color = color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 	set_mass(s.get_mass());
 	set_acc(s.get_acc());
 	set_vel(s.get_vel());

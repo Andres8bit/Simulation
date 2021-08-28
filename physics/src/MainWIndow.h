@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-
+#include<string>
 
 template <class T> void SafeRelease(T** ppT)
 {
@@ -58,9 +58,11 @@ private:
     enum Mode {
         DrawMode,
         SelectMode,
-        DragMode
+        DragMode,
+        PlayMode
     };
 
+   
     Mode mode;
     size_t nextColor;
     HCURSOR hCursor;
@@ -97,6 +99,7 @@ private:
     void    DiscardGraphicsResources();
     void    OnPaint();
     void    Resize();
+    void OnRButtonDown(int pixelX, int pixelY, DWORD flags);
     void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
     void OnLButtonUp();
     void OnMouseMove(int pixelX, int pixelY, DWORD flags);
@@ -106,16 +109,27 @@ private:
 
 
 public:
-
+    Engine eng;
     MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
         ptMouse(D2D1::Point2F()), nextColor(0), selection(spheres.end())
     {
     }
-
+    void Update();
+    void Render();
     PCWSTR  ClassName() const { return L"Circle Window Class"; }
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
+void MainWindow::Update() {
+    eng.step();
+}
+
+void MainWindow::Render() {
+    pRenderTarget->BeginDraw();
+    pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
+    eng.render(pRenderTarget,pBrush);
+    pRenderTarget->EndDraw();
+}
 
 void MainWindow::SetMode(Mode m)
 {
@@ -156,7 +170,7 @@ HRESULT MainWindow::InsertSphere(float x, float y) {
         Selection()->set_center(Vec(x,y));
         Selection()->set_raduis(2.0f);
         Selection()->set_color(D2D1::ColorF(colors[nextColor]));
-
+        eng.add_obj(*Selection());
         nextColor = (nextColor + 1) % ARRAYSIZE(colors);
     }
     catch (std::bad_alloc)
@@ -283,14 +297,19 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
     // Run the message loop.
 
-    MSG msg = { };
-    while (GetMessage(&msg, NULL, 0, 0))
+    MSG msg;
+    msg.message = WM_NULL;
+    while (msg.message != WM_QUIT)
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            DispatchMessage(&msg);
+        }
+        else {
+            win.Update();
+            win.Render();
+        }
     }
-
-    return 0;
+    return msg.wParam;
 }
 
 LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -321,6 +340,12 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         Resize();
         return 0;
+    case WM_RBUTTONDOWN:
+        onSpaceDown();
+        //if (mode == SelectMode) SetMode(DrawMode);
+        //if (mode == DragMode ) SetMode(DrawMode);
+        //if (mode == DrawMode) SetMode(DragMode);
+        return 0;
     case WM_LBUTTONDOWN:
         OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
@@ -331,12 +356,9 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
     case WM_KEYDOWN:
-        if (wParam & 0x20) {
-            swprintf_s(msg, L"WM_KEYDOWN: 0x%x\n", wParam);
-            OutputDebugString(msg);
-    
-        }
-
+            if (wParam & 0x20) {
+                onSpaceDown();
+            }
         return 0;
     }
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
@@ -362,8 +384,7 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags) {
             ptMouse = D2D1::Point2F(pos.x, pos.y);
             ptMouse.x -= dipX;
             ptMouse.y -= dipY;
-
-            SetMode(DragMode);
+           // SetMode(DragMode);
         }
     }
     InvalidateRect(m_hwnd, NULL, FALSE);
@@ -392,7 +413,6 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
             const float height = (dipY - ptMouse.y) / 2;
             const float x1 = ptMouse.x + width;
             const float y1 = ptMouse.y + height;
-
             Selection()->set_center(Vec(x1, y1)); 
             Selection()->set_raduis(width);
         }
@@ -403,3 +423,22 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
     }
 }
 
+void MainWindow::onSpaceDown() {
+   // mode = PlayMode;
+    InvalidateRect(m_hwnd, NULL, FALSE);
+    pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
+   // for (auto i = spheres.begin(); i != spheres.end(); ++i) {
+      // (*i)->Redraw(pRenderTarget, pBrush);
+    //}
+
+    MessageBox(NULL, L"step", L"mainwindow", NULL);
+}
+
+void MainWindow::OnRButtonDown(int pixelX, int pixelY, DWORD flags) {
+    if (mode == DrawMode) {
+        mode = DragMode;
+    }
+    if (mode == DragMode) {
+        mode = DrawMode;
+    }
+}
