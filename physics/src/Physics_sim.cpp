@@ -9,7 +9,7 @@ Vec runge_kutta(const Vec& x, force f, const double& t, const double& h, const s
         k2 = h * f(y + (0.5 * k1), t + 0.5 * h);
         k3 = h * f(y + (0.5 * k2), t + 0.5 * h);
         k4 = h * f(y + (k3), t + h);
-        y = y + 1 / 6 * (k1 + (2 * k2) + (2 * k3) + k4);
+        y = y + (0.1666667) * (k1 + (2 * k2) + (2 * k3) + k4);
     }
     return y;
 }
@@ -18,13 +18,13 @@ Vec earth_grav(Vec x, const double& t) {
 }
 
 void grav(Obj& x, force f, double& t) {
-    Vec pos = runge_kutta(x.get_acc(), f, t, t / 10, 10);
+    Vec pos = runge_kutta(x.get_pos(), f, t, 1, 1);
     char buff[100];
     sprintf_s(buff, "name is:%s", f);
     std::cout << buff;
     std::wstring name = L"stackoverflow";
 
-    MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
+    //MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
 
     x.set_pos(pos);
 }
@@ -40,7 +40,7 @@ Engine::~Engine() {
 }
 
 void Engine::add_obj(Sphere& obj){
-    MessageBox(NULL, L"adding", L"engine", NULL);
+   // MessageBox(NULL, L"adding", L"engine", NULL);
     selection = objs.insert(
         objs.end(),
         std::shared_ptr<Sphere>(new Sphere(obj)));
