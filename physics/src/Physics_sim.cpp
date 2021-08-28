@@ -18,7 +18,14 @@ Vec earth_grav(Vec x, const double& t) {
 }
 
 void grav(Obj& x, force f, double& t) {
-    Vec pos = x.get_pos() + runge_kutta(x.get_acc(), f, t, t / 10, 10);
+    Vec pos = runge_kutta(x.get_acc(), f, t, t / 10, 10);
+    char buff[100];
+    sprintf_s(buff, "name is:%s", f);
+    std::cout << buff;
+    std::wstring name = L"stackoverflow";
+
+    MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
+
     x.set_pos(pos);
 }
 /*Member Functions:*/
@@ -76,6 +83,19 @@ void Engine::apply(Sphere& x, FUNC f, double t) {
 }
 
 BOOL Engine::hit_test(float x, float y) {
-
-
+    for (auto i = objs.rbegin(); i != objs.rend(); ++i) {
+        if ((*i)->HitTest(x, y)) {
+            selection = (++i).base();
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+std::shared_ptr<Sphere> Engine::Selection() {
+    if (selection == objs.end()) {
+        return nullptr;
+    }
+    else {
+        return(*selection);
+    }
 }

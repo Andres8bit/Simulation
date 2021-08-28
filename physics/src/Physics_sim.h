@@ -18,15 +18,8 @@ private:
 	std::list<std::shared_ptr<Sphere>>::iterator selection;
 	double time;
 	void apply(Sphere& x, FUNC f, double t);
-	void clear_selection() { selection = objs.end(); }
-	std::shared_ptr<Sphere> Selection() {
-		if (selection == objs.end()) {
-			return nullptr;
-		}
-		else {
-			return(*selection);
-		}
-	}
+
+
 
 public:
 	Engine();
@@ -34,4 +27,7 @@ public:
 	void add_obj(Sphere& item);
 	void step();
 	void render(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush);
+	BOOL hit_test(float x, float y);
+	std::shared_ptr<Sphere> Selection();
+	void clear_selection() { selection = objs.end(); }
 };
