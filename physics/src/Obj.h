@@ -23,7 +23,8 @@ public:
     virtual  void set_type(TYPE val) = 0;
     virtual void set_color(D2D1::ColorF color) = 0;
     virtual void Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) = 0;
-    virtual BOOL HitTest(float x, float y) = 0 ;
+    virtual BOOL HitTest(float x, float y) = 0;
+    virtual Vec bounds() = 0 ;
   
 private:
     virtual void copy(const Obj& x) = 0;

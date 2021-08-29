@@ -17,6 +17,7 @@ public:
     Sphere(Vec center, double radius = 0.5);
     Sphere(double xpos = 0.0, double ypos = 0.0, double radius = 0.5);
     ~Sphere();
+
     //getters:
     Vec get_pos()const { return Vec(ui.point.x, ui.point.y); };
     double get_mass()const { return mass; };
@@ -25,8 +26,8 @@ public:
     Vec get_acc()const { return acc; };
     Vec get_center()const { return Vec(ui.point.x, ui.point.y); }
     double get_radius()const { return ui.radiusX; }
-    //setter:
 
+    //setter:
     void set_pos(Vec pos) { ui.point.x = pos.x; ui.point.y = pos.y; }
     void set_mass(double val) { mass = val; }
     void set_vel(Vec val) { vel = val; };
@@ -42,4 +43,5 @@ public:
     void Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush);
     BOOL HitTest(float x, float y);
     void Redraw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush);
+    Vec bounds(){return Vec((double)ui.point.x + ui.radiusX, (double)ui.point.y + ui.radiusY);}
 };
