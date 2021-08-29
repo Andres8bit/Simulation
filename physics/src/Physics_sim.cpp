@@ -17,21 +17,23 @@ Vec earth_grav(Vec x, const double& t) {
     return Vec(0, 9.8);
 }
 
-void grav(Obj& x, force f, double& t) {
-    Vec pos = runge_kutta(x.get_pos(), f, t, 1, 1);
+void grav(Obj& x, force f, Vec bounds) {
+    Vec pos = runge_kutta(x.get_pos(), f, 1, 1, 1);
     char buff[100];
     sprintf_s(buff, "name is:%s", f);
     std::cout << buff;
     std::wstring name = L"stackoverflow";
 
     //MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
-
-    x.set_pos(pos);
+    if((pos.x  >= 0 && pos.x < bounds.x) && (pos.y >= 0 && pos.y < bounds.y))
+         x.set_pos(pos);
 }
 /*Member Functions:*/
-Engine::Engine(){
+Engine::Engine(float x, float y){
     time = 0.0;
     selection = objs.end();
+    this->xBounds = x;
+    this->yBounds = y;
 }
 
 Engine::~Engine() {
@@ -71,7 +73,7 @@ void Engine::apply(Sphere& x, FUNC f, double t) {
     switch (f)
     {
     case CONST_ACC:
-        grav(x, earth_grav, time);
+        grav(x, earth_grav,Vec(xBounds,yBounds));
         break;
     case ACC:
         break;

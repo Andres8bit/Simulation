@@ -14,6 +14,8 @@ typedef Vec(*fx)(Vec);
 enum FUNC { CONST_ACC, ACC, VEL };
 class Engine {
 private:
+	float xBounds;
+	float yBounds;
 	std::list<std::shared_ptr<Sphere>> objs;
 	std::list<std::shared_ptr<Sphere>>::iterator selection;
 	double time;
@@ -22,7 +24,7 @@ private:
 
 
 public:
-	Engine();
+	Engine(float x = 800, float y = 600);
 	~Engine();
 	void add_obj(Sphere& item);
 	void step();
@@ -30,4 +32,5 @@ public:
 	BOOL hit_test(float x, float y);
 	std::shared_ptr<Sphere> Selection();
 	void clear_selection() { selection = objs.end(); }
-};
+	void set_bounds(float x, float y) { this->xBounds = x; this->yBounds = y; };
+};   

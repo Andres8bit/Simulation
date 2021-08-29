@@ -196,7 +196,7 @@ HRESULT MainWindow::CreateGraphicsResources()
     {
         RECT rc;
         GetClientRect(m_hwnd, &rc);
-
+        eng.set_bounds(rc.right, rc.bottom);
         D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
 
         //Creates a render target window:
