@@ -124,8 +124,9 @@ void MainWindow::Render() {
 
         eng.render(pRenderTarget, pBrush);
         if (eng.Selection()) {
-            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-            pRenderTarget->DrawEllipse(eng.Selection()->get_ui(), pBrush, 2.0f);
+            (eng.Selection())->Draw(pRenderTarget,pBrush);
+            //pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+            //pRenderTarget->DrawEllipse(eng.Selection()->get_ui(), pBrush, 2.0f);
         }
 
         //signals the end of drawing.
@@ -172,7 +173,7 @@ HRESULT MainWindow::InsertSphere(float x, float y) {
         Sphere temp;
         eng.add_obj(temp);
         ptMouse = D2D1::Point2F(x, y);
-        eng.Selection()->set_center(Vec(x,y));
+        eng.Selection()->set_pos(Vec(x,y));
         eng.Selection()->set_raduis(2.0f);
         eng.Selection()->set_color(D2D1::ColorF(colors[nextColor]));
    
@@ -381,7 +382,7 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags) {
         eng.clear_selection();
         if (HitTest(dipX, dipY)) {
             SetCapture(m_hwnd);
-            Vec pos = eng.Selection()->get_center();
+            Vec pos = eng.Selection()->get_pos();
             ptMouse = D2D1::Point2F(pos.x, pos.y);
             ptMouse.x -= dipX;
             ptMouse.y -= dipY;
@@ -414,11 +415,11 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
             const float height = (dipY - ptMouse.y) / 2;
             const float x1 = ptMouse.x + width;
             const float y1 = ptMouse.y + height;
-            eng.Selection()->set_center(Vec(x1, y1)); 
+            eng.Selection()->set_pos(Vec(x1, y1)); 
             eng.Selection()->set_raduis(width);
         }
         else if (mode == DragMode) {
-            eng.Selection()->set_center(Vec(dipX + double(ptMouse.x), dipY + double(ptMouse.y)));
+            eng.Selection()->set_pos(Vec(dipX + double(ptMouse.x), dipY + double(ptMouse.y)));
         }
        InvalidateRect(m_hwnd, NULL, FALSE);
     }

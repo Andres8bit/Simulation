@@ -8,28 +8,23 @@ class Plane :public Obj
     Plane(const Plane& other);
     Plane(const Obj& other);
     Plane& operator=(const Plane& other);
-    double get_mass()const;
-    TYPE get_type()const;
-    Vec get_vel()const;
-    Vec get_acc()const;
-    Vec get_pos()const;
-    //setter:
-    void set_mass(double val);
-    void set_pos(Vec pos);
-    void set_vel(Vec val);
-    void set_acc(Vec val);
-    void set_type(TYPE val);
-    void set_color(D2D1::ColorF color);
+
+    //Getters:
+    Vec get_pos()const { return Vec(this->ui.left,this->ui.top); }
+    Vec get_dims()const { return Vec(this->ui.right,this->ui.bottom); }
+    D2D1_COLOR_F get_color()const { return this->color; }
+    //Setters:
+    void set_color(const D2D1_COLOR_F& color) { this->color = color; }
+    void set_pos(Vec pos) { this->ui.right = pos.x; this->ui.top = pos.y; }
+    void set_dims(Vec dims) { this->ui.right = dims.x; this->ui.bottom = dims.y; }
     void Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush);
     BOOL HitTest(float x, float y);
-    Vec bounds();
+    Bounds bounds();
 
 private:
     void copy(const Obj& x) { copy(*(Plane*)&x); }
     void copy(const Plane& x);
-    Vec vel;
-    double mass;
-    TYPE type;
+    D2D1_RECT_F ui;
     Vec upperL;
     Vec dims;
 };

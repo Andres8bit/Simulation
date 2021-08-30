@@ -23,12 +23,13 @@ Sphere::~Sphere()
 	ui.point.x = ui.point.y = ui.radiusX = ui.radiusY = 0.0;
 
 }
-void Sphere::step_position() {
 
-}
+Sphere& Sphere::operator=(const Sphere& other) {
+	if (this == &other)
+		return *this;
 
-
-void Sphere::step_orientation() {
+	copy(other);
+	return *this;
 }
 
 void Sphere::Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
@@ -37,9 +38,7 @@ void Sphere::Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
 	pRT->DrawEllipse(ui, pBrush, 1.0f);
 }
 
-void Sphere::Redraw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
-	pRT->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
-}
+
 BOOL Sphere:: HitTest(float x, float y) {
 	const float a = ui.radiusX;
 	const float b = ui.radiusY;
@@ -50,7 +49,7 @@ BOOL Sphere:: HitTest(float x, float y) {
 }
 
 void Sphere::copy(const Sphere& s){
-	Vec center = s.get_center();
+	Vec center = s.get_pos();
 	double r = s.get_radius();
 	ui.point.x = center.x;
 	ui.point.y = center.y;
@@ -60,4 +59,14 @@ void Sphere::copy(const Sphere& s){
 	set_mass(s.get_mass());
 	set_acc(s.get_acc());
 	set_vel(s.get_vel());
+}
+
+Bounds Sphere::bounds() {
+	Vec center = Vec(this->ui.point.x, this->ui.point.y);
+	double r = this->ui.radiusX;
+
+	Vec upperL = center - Vec(r, r);// top Left is center - radius
+	Vec lowerR = center + Vec(r, r);// lower right is center + radius 
+
+     return Bounds(upperL, lowerR);
 }

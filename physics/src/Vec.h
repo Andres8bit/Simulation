@@ -8,7 +8,6 @@ struct Vec {
             return *this;
         this->x = other.x;
         this->y = other.y;
-
         return *this;
     }
     double dot(const Vec& y){ return x * y.x + this->y * y.y;}

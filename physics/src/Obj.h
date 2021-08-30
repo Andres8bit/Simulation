@@ -1,31 +1,44 @@
-#include"Vec.h"
+#include "Bounds.h"
 #pragma once
 #include <d2d1.h>
 #include<WinUser.h>
 #pragma comment(lib, "d2d1")
 
-enum class TYPE { SPHERE, TRIANGLE, PLANE };
+enum class TYPE { BASE,SPHERE, TRIANGLE, PLANE };
 class Obj {
 public:
-    Obj() {};
+    Obj() {
+        this->color = D2D1::ColorF(D2D1::ColorF::Black);
+        this->mass = 0.0;
+        this->acc = Vec();
+        this->vel = Vec();
+        this->type = TYPE::BASE;
+    };
     Obj(Obj& x) { copy(x); };
     //getters:
-    virtual double get_mass()const = 0 ;
-    virtual TYPE get_type()const = 0;
-    virtual Vec get_vel()const = 0;
-    virtual Vec get_acc()const = 0;
     virtual Vec get_pos()const = 0;
+    double get_mass()const { return this->mass; }
+    TYPE get_type()const { return this->type; }
+    Vec get_vel()const { return this->vel; }
+    Vec get_acc()const { return this->acc; }
+    D2D1_COLOR_F get_color()const { return this->color; }
     //setter:
-    virtual void set_mass(double val) = 0;
-    virtual void set_pos(Vec pos) = 0;
-    virtual void set_vel(Vec val) = 0;
-    virtual void set_acc(Vec val) = 0;
-    virtual  void set_type(TYPE val) = 0;
-    virtual void set_color(D2D1::ColorF color) = 0;
+    virtual void set_pos(const Vec pos) = 0;
+    void set_mass(double val) { this->mass = val; }
+    void set_vel(Vec val) { this->vel = val; }
+    void set_acc(Vec val) { this->acc = val; }
+    void set_type(TYPE val) { this->type = val; }
+    void set_color(D2D1::ColorF color) { this->color = color; }
     virtual void Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) = 0;
     virtual BOOL HitTest(float x, float y) = 0;
-    virtual Vec bounds() = 0 ;
+    virtual Bounds bounds() = 0 ;
   
 private:
     virtual void copy(const Obj& x) = 0;
+protected:
+    D2D1_COLOR_F    color;
+    Vec vel;
+    Vec acc;
+    double mass;
+    TYPE type;
 };

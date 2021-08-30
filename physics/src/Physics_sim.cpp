@@ -25,7 +25,7 @@ void grav(Obj& x, force f, Vec bounds) {
     std::wstring name = L"stackoverflow";
 
     //MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
-    if((pos.x  >= 0 && pos.x < bounds.x) && (pos.y >= 0 && pos.y < bounds.y))
+    if((x.bounds().x  >= 0 && x.bounds().x  < bounds.x) && (x.bounds().y >= 0 && x.bounds().y < bounds.y))
          x.set_pos(pos);
 }
 /*Member Functions:*/
