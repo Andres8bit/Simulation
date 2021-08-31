@@ -14,5 +14,7 @@ struct Vec {
     friend
         Vec operator+(const Vec& x, const Vec& y);
     friend
-        Vec operator*(const double& c, const Vec& y);       
+        Vec operator*(const double& c, const Vec& y);    
+    friend
+        Vec operator-(const Vec& x, const Vec& y);
 };

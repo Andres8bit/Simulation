@@ -16,6 +16,22 @@ Vec runge_kutta(const Vec& x, force f, const double& t, const double& h, const s
 Vec earth_grav(Vec x, const double& t) {
     return Vec(0, 9.8);
 }
+Vec force_field(Vec x, const double& t) {
+    return Vec(2*cos(x.y),2*sin(4*x.y));
+}
+void apply_force_field(Obj& x, force f, Vec bounds) {
+    Vec temp = runge_kutta(x.get_pos(), f, .1, 1, 1);
+    Bounds check(x.get_pos(), temp);
+    
+    char buff[100];
+    sprintf_s(buff, "name is:%s", f);
+    std::cout << buff;
+    std::wstring name = L"stackoverflow";
+
+    //MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
+    if ((check.lowerR.x >= 0 && check.upperL.x < bounds.x) && (check.lowerR.y >= 0 && check.upperL.y < bounds.y))
+        x.set_pos(temp);
+}
 
 void grav(Obj& x, force f, Vec bounds) {
     Vec pos = runge_kutta(x.get_pos(), f, 1, 1, 1);
@@ -25,7 +41,7 @@ void grav(Obj& x, force f, Vec bounds) {
     std::wstring name = L"stackoverflow";
 
     //MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
-    if((x.bounds().x  >= 0 && x.bounds().x  < bounds.x) && (x.bounds().y >= 0 && x.bounds().y < bounds.y))
+    if((x.bounds().lowerR.x  >= 0 && x.bounds().upperL.x  < bounds.x) && (x.bounds().lowerR.y >= 0 && x.bounds().upperL.y < bounds.y))
          x.set_pos(pos);
 }
 /*Member Functions:*/
@@ -41,12 +57,13 @@ Engine::~Engine() {
     time = 0.0;
 }
 
-void Engine::add_obj(Sphere& obj){
+void Engine::add_obj(Obj& obj){
    // MessageBox(NULL, L"adding", L"engine", NULL);
-    selection = objs.insert(
-        objs.end(),
-        std::shared_ptr<Sphere>(new Sphere(obj)));
-    
+    if (obj.get_type() == TYPE::SPHERE) {
+        selection = objs.insert(
+            objs.end(),
+            std::shared_ptr<Sphere>(new Sphere(obj)));
+    }
 }
 
 
@@ -68,12 +85,13 @@ void Engine::render(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
     }
 
 }
-void Engine::apply(Sphere& x, FUNC f, double t) {
+void Engine::apply(Obj& x, FUNC f, double t) {
 
     switch (f)
     {
     case CONST_ACC:
-        grav(x, earth_grav,Vec(xBounds,yBounds));
+       // grav(x, earth_grav,Vec(xBounds,yBounds));
+        apply_force_field(x, force_field, Vec(xBounds, yBounds));
         break;
     case ACC:
         break;
@@ -93,7 +111,8 @@ BOOL Engine::hit_test(float x, float y) {
     }
     return FALSE;
 }
-std::shared_ptr<Sphere> Engine::Selection() {
+
+std::shared_ptr<Obj> Engine::Selection(){
     if (selection == objs.end()) {
         return nullptr;
     }

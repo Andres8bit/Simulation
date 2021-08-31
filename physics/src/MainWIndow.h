@@ -62,8 +62,9 @@ private:
         PlayMode
     };
 
-
+    Engine eng;
     Mode mode;
+    TYPE obj_mode;
     size_t nextColor;
     HCURSOR hCursor;
     // Factory Pointer
@@ -76,29 +77,30 @@ private:
     D2D1_ELLIPSE           ellipse;
     // Mouse Pointer
     D2D1_POINT_2F          ptMouse;
-
+    HRESULT InsertObj(float x, float y);
     HRESULT InsertSphere(float x, float y);
-
+    HRESULT InsertRect(float x, float y);
+    HRESULT InsertTriangle(float x, float y);
     BOOL HitTest(float x, float y);
     void    CalculateLayout();
     HRESULT CreateGraphicsResources();
     void    DiscardGraphicsResources();
     void    OnPaint();
     void    Resize();
-    void OnRButtonDown(int pixelX, int pixelY, DWORD flags);
+    void OnRButtonDown();
     void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
     void OnLButtonUp();
     void OnMouseMove(int pixelX, int pixelY, DWORD flags);
     void onSpaceDown();
     void SetMode(Mode m);
+    void SetObjType(WPARAM choice);
 
-
-    Engine eng;
 public:
 
     MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
         ptMouse(D2D1::Point2F()), nextColor(0)
     {
+        obj_mode = TYPE::SPHERE;
     }
     void Update();
     void Render();
@@ -120,7 +122,7 @@ void MainWindow::Render() {
         //signal start of drawing.
         pRenderTarget->BeginDraw();
         //fills whole render with a single color.
-        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 
         eng.render(pRenderTarget, pBrush);
         if (eng.Selection()) {
@@ -171,11 +173,16 @@ HRESULT MainWindow::InsertSphere(float x, float y) {
     try
     {
         Sphere temp;
+        temp.set_pos(Vec(x, y));
+        temp.set_color(D2D1::ColorF(colors[nextColor]));
+        temp.set_raduis(2.0f);
         eng.add_obj(temp);
+        ((Sphere*)eng.Selection().get())->set_color(D2D1::ColorF(colors[nextColor]));
         ptMouse = D2D1::Point2F(x, y);
-        eng.Selection()->set_pos(Vec(x,y));
-        eng.Selection()->set_raduis(2.0f);
-        eng.Selection()->set_color(D2D1::ColorF(colors[nextColor]));
+        //eng.Selection()->set_pos(Vec(x,y));
+        //if(eng.Selection()->get_type() == TYPE::SPHERE)
+          //  eng.Selection()->set_raduis(2.0f);
+        //eng.Selection()->set_color(D2D1::ColorF(colors[nextColor]));
    
         nextColor = (nextColor + 1) % ARRAYSIZE(colors);
     }
@@ -249,18 +256,10 @@ void MainWindow::OnPaint()
         //signal start of drawing.
         pRenderTarget->BeginDraw();
         //fills whole render with a single color.
-        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
         
-        //for (auto i = spheres.begin(); i != spheres.end(); ++i) {
-          //  (*i)->Draw(pRenderTarget, pBrush);
-        //}
-        // 
+        //Render scenes
         eng.render(pRenderTarget, pBrush);
-        //if (eng.Selection()) {
-           // pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-         //   pRenderTarget->DrawEllipse(eng.Selection()->get_ui(), pBrush, 2.0f);
-       // }
-      
         //signals the end of drawing.
         hr = pRenderTarget->EndDraw(); // returns failure or success of rendering.
         if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
@@ -343,11 +342,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         Resize();
         return 0;
     case WM_RBUTTONDOWN:
-        onSpaceDown();
-        //if (mode == SelectMode) SetMode(DrawMode);
-        //if (mode == DragMode ) SetMode(DrawMode);
-        //if (mode == DrawMode) SetMode(DragMode);
-        return 0;
+        OnRButtonDown();
     case WM_LBUTTONDOWN:
         OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
@@ -358,9 +353,13 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
     case WM_KEYDOWN:
-            if (wParam & 0x20) {
+ 
+        SetObjType(wParam);
+        if (wParam & 0x20) {
                 onSpaceDown();
-            }
+         }
+  
+
         return 0;
     }
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
@@ -375,7 +374,8 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags) {
 
         if (DragDetect(m_hwnd, pt)) {
             SetCapture(m_hwnd);
-            InsertSphere(dipX, dipY);
+            InsertObj(dipX, dipY);
+            //InsertSphere(dipX, dipY);
         }
     }
     else {
@@ -386,7 +386,6 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags) {
             ptMouse = D2D1::Point2F(pos.x, pos.y);
             ptMouse.x -= dipX;
             ptMouse.y -= dipY;
-           // SetMode(DragMode);
         }
     }
     InvalidateRect(m_hwnd, NULL, FALSE);
@@ -399,7 +398,7 @@ void MainWindow::OnLButtonUp()
         InvalidateRect(m_hwnd, NULL, FALSE);
     }
     else if (mode == DragMode) {
-        SetMode(SelectMode);
+
     }
     ReleaseCapture();
 }
@@ -416,7 +415,7 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
             const float x1 = ptMouse.x + width;
             const float y1 = ptMouse.y + height;
             eng.Selection()->set_pos(Vec(x1, y1)); 
-            eng.Selection()->set_raduis(width);
+            ((Sphere*)eng.Selection().get())->set_raduis(width);
         }
         else if (mode == DragMode) {
             eng.Selection()->set_pos(Vec(dipX + double(ptMouse.x), dipY + double(ptMouse.y)));
@@ -426,21 +425,61 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
 }
 
 void MainWindow::onSpaceDown() {
-   // mode = PlayMode;
-    InvalidateRect(m_hwnd, NULL, FALSE);
-    pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
-   // for (auto i = spheres.begin(); i != spheres.end(); ++i) {
-      // (*i)->Redraw(pRenderTarget, pBrush);
-    //}
-
-    MessageBox(NULL, L"step", L"mainwindow", NULL);
+    if (mode == DrawMode) mode = DragMode;
+    if (mode == DragMode) mode = DrawMode;
 }
 
-void MainWindow::OnRButtonDown(int pixelX, int pixelY, DWORD flags) {
-    if (mode == DrawMode) {
-        mode = DragMode;
+void MainWindow::OnRButtonDown() {
+    
+    mode = mode == DrawMode ? DragMode : DrawMode;
+}
+
+void MainWindow::SetObjType(WPARAM choice) {
+    if (choice == 0x54) 
+        obj_mode = TYPE::TRIANGLE;
+    else {
+        if (choice == 0x50) {
+            obj_mode = TYPE::PLANE;
+
+        }
+        else {
+            if (choice == 0x53) {
+                obj_mode = TYPE::SPHERE;
+
+            }
+        }
     }
-    if (mode == DragMode) {
-        mode = DrawMode;
+  
+}
+
+HRESULT MainWindow::InsertObj(float x, float y) {
+    try {
+        if (obj_mode == TYPE::SPHERE) {
+            InsertSphere(x, y);
+        }
+
+        if (obj_mode == TYPE::PLANE) {
+            InsertRect(x, y);
+            MessageBox(NULL, L"should be plane ", L"Msg title", MB_OK | MB_ICONQUESTION);
+        }
+
+        if (obj_mode == TYPE::TRIANGLE) {
+            InsertSphere(x, y);
+            MessageBox(NULL, L"should be triangle ", L"Msg title", MB_OK | MB_ICONQUESTION);
+
+        }
     }
+    catch (std::bad_alloc)
+    {
+        return E_OUTOFMEMORY;
+    }
+    return S_OK;
+}
+
+HRESULT MainWindow::InsertRect(float x, float y) {
+    return S_OK;
+}
+
+HRESULT MainWindow::InsertTriangle(float x, float y) {
+    return S_OK;
 }

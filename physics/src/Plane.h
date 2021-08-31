@@ -4,7 +4,7 @@
 class Plane :public Obj
 {
     Plane(double x = 0, double y = 0, double w = 1, double h = 1);
-    Plane(Vec uL, Vec width_hieght);
+    Plane(Vec uL, Vec lR);
     Plane(const Plane& other);
     Plane(const Obj& other);
     Plane& operator=(const Plane& other);
