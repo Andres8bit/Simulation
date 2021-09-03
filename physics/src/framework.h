@@ -19,9 +19,11 @@
 #include "BaseWindow.h"
 #include<windowsx.h>
 #include"Sphere.h"
+#include"Plane.h"
 #include<WinUser.h>
 #include <memory.h>
 #include <list>
+#include"Physics_sim.h"
 #include <iostream>
 #include <d2d1.h>
 #pragma comment(lib, "d2d1")

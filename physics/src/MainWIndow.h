@@ -94,6 +94,7 @@ private:
     void onSpaceDown();
     void SetMode(Mode m);
     void SetObjType(WPARAM choice);
+    void resizeObj(std::shared_ptr<Obj>& obj,Vec& pos,Vec& dims);
 
 public:
 
@@ -375,7 +376,6 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags) {
         if (DragDetect(m_hwnd, pt)) {
             SetCapture(m_hwnd);
             InsertObj(dipX, dipY);
-            //InsertSphere(dipX, dipY);
         }
     }
     else {
@@ -410,12 +410,16 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
     if ((flags & MK_LBUTTON) && eng.Selection())
     {
         if (mode == DrawMode) {
-            const float width = (dipX - ptMouse.x) / 2;
-            const float height = (dipY - ptMouse.y) / 2;
-            const float x1 = ptMouse.x + width;
-            const float y1 = ptMouse.y + height;
-            eng.Selection()->set_pos(Vec(x1, y1)); 
-            ((Sphere*)eng.Selection().get())->set_raduis(width);
+            Vec dims = Vec((dipX - ptMouse.x) / 2, (dipY - ptMouse.y) / 2);
+            //const float width = (dipX - ptMouse.x) / 2;
+            //const float height = (dipY - ptMouse.y) / 2;
+            //const float x1 = ptMouse.x + width;
+            //const float y1 = ptMouse.y + height;
+            Vec posF = Vec(ptMouse.x + dims.x, ptMouse.y + dims.y);
+            TYPE objType = eng.Selection()->get_type();
+            eng.Selection()->set_pos(Vec(posF.x, posF.y));
+            std::shared_ptr<Obj> temp = eng.Selection();
+            resizeObj(temp,posF,dims);            
         }
         else if (mode == DragMode) {
             eng.Selection()->set_pos(Vec(dipX + double(ptMouse.x), dipY + double(ptMouse.y)));
@@ -477,9 +481,43 @@ HRESULT MainWindow::InsertObj(float x, float y) {
 }
 
 HRESULT MainWindow::InsertRect(float x, float y) {
+    try
+    {
+        Plane temp;
+        temp.set_pos(Vec(x, y));
+        eng.add_obj(temp);
+        ((Plane*)eng.Selection().get())->set_color(D2D1::ColorF(colors[nextColor]));
+        ptMouse = D2D1::Point2F(x, y);
+        //eng.Selection()->set_pos(Vec(x,y));
+        //if(eng.Selection()->get_type() == TYPE::SPHERE)
+        ((Plane*)eng.Selection().get())->set_dims(Vec(2.0f,2.0f));
+        //eng.Selection()->set_color(D2D1::ColorF(colors[nextColor]));
+
+        nextColor = (nextColor + 1) % ARRAYSIZE(colors);
+    }
+    catch (std::bad_alloc)
+    {
+        return E_OUTOFMEMORY;
+    }
     return S_OK;
 }
 
 HRESULT MainWindow::InsertTriangle(float x, float y) {
     return S_OK;
+}
+
+void MainWindow::resizeObj(std::shared_ptr<Obj>& obj,Vec& pos,Vec& dims) {
+    TYPE objType = obj->get_type();
+
+    switch (objType) {
+    case TYPE::SPHERE:
+        ((Sphere*)obj.get())->set_raduis(dims.y);
+        break;
+    case TYPE::PLANE:
+        ((Plane*)obj.get())->set_dims(Vec(dims));
+    default:
+        break;
+    }
+
+
 }

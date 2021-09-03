@@ -1,17 +1,15 @@
 #include "Plane.h"
-Plane::Plane(double x, double y, double w,double h)
- {
-    this->ui.left = x;
-    this->ui.top = y;
-    this->ui.right = w;
-    this->ui.bottom = h;
-    this->mass = 0.0;
-    this->vel = Vec();
-    this->acc = Vec();
-    this->type = TYPE::PLANE;
-}
 
-Plane::Plane(Vec uL, Vec lR) {
+Plane::Plane(double x, double y, double w, double h) {
+    Vec uL = Vec(x, y);
+    Vec lR = Vec(w - x, h - y);
+    *this = Plane(uL, lR);
+    this->ui = D2D1_RECT_F();
+    this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
+}
+Plane::Plane(Vec& uL, Vec& lR) {
+    this->upperL = uL;
+    this->lowerR = lR;
     this->ui.left = uL.x;
     this->ui.top = uL.y;
     this->ui.right = lR.x;
@@ -20,6 +18,9 @@ Plane::Plane(Vec uL, Vec lR) {
     this->vel = Vec();
     this->acc = Vec();
     this->type = TYPE::PLANE;
+    this->dims = lR - uL;
+    this->ui = D2D1_RECT_F();
+    this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 
 Plane::Plane(const Plane& other) {
