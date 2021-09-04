@@ -64,6 +64,12 @@ void Engine::add_obj(Obj& obj){
             objs.end(),
             std::shared_ptr<Sphere>(new Sphere(obj)));
     }
+
+    if (obj.get_type() == TYPE::PLANE) {
+        selection = objs.insert(
+            objs.end(),
+            std::shared_ptr<Plane>(new Plane(obj)));
+    }
 }
 
 

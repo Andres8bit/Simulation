@@ -2,24 +2,23 @@
 
 Plane::Plane(double x, double y, double w, double h) {
     Vec uL = Vec(x, y);
-    Vec lR = Vec(w - x, h - y);
-    *this = Plane(uL, lR);
-    this->ui = D2D1_RECT_F();
-    this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
+    Vec lR = Vec(x+w,y+h);
+    this->ui.top = uL.y;
+    this->ui.left = uL.x;
+    this->ui.bottom = lR.y;
+    this->ui.right = lR.x;
+   // this->ui = D2D1_RECT_F();
+   this->type = TYPE::PLANE;
+   this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
-Plane::Plane(Vec& uL, Vec& lR) {
-    this->upperL = uL;
-    this->lowerR = lR;
+Plane::Plane(Vec uL, Vec lR) {
     this->ui.left = uL.x;
     this->ui.top = uL.y;
     this->ui.right = lR.x;
     this->ui.bottom = lR.y;
-    this->mass = 0.0;
-    this->vel = Vec();
-    this->acc = Vec();
+
     this->type = TYPE::PLANE;
-    this->dims = lR - uL;
-    this->ui = D2D1_RECT_F();
+//    this->ui = D2D1_RECT_F();
     this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 
@@ -62,14 +61,39 @@ void Plane::Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
 
 BOOL Plane::HitTest(float x, float y) { 
     Vec upperL = this->get_pos();
-    Vec lowerR = this->get_dims();
+    Vec lowerR = this->get_dims() + upperL;
 
-    if((x < upperL.x || x > lowerR.x) && (y < upperL.y || y > lowerR.y ))
-            return false;
-    return true;
+    if((x >= upperL.x && x <= lowerR.x) && (y >= upperL.y && y <= lowerR.y ))
+            return true;
+    return false;
 }
 
 Bounds Plane::bounds(){
     return Bounds(this->get_pos(), this->get_dims()); 
 }
 
+void Plane::set_pos(Vec pos) {
+    Vec del = pos - Vec(this->ui.left, this->ui.top);
+    this->ui.left = pos.x;
+    this->ui.top = pos.y;
+    this->ui.bottom += del.y;
+    this->ui.right  += del.x;
+}
+
+Vec Plane::get_dims()const
+{
+    Vec uL = Vec(this->ui.left, this->ui.top);
+    Vec lR = Vec(this->ui.right, this->ui.bottom);
+
+    return lR - uL;
+
+}
+
+void Plane::set_dims(double width, double hieght) {
+    this->ui.right = this->ui.left + width;
+    this->ui.bottom = this->ui.top + hieght;
+}
+
+Vec Plane::center_mass()const{
+
+}

@@ -22,6 +22,8 @@ private:
 	std::list<std::shared_ptr<Obj>>::iterator selection;
 	double time;
 	void apply(Obj& x, FUNC f, double t);
+	Vec Impulse() {};
+	void collision();
 
 
 

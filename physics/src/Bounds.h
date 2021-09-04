@@ -15,4 +15,7 @@ struct Bounds {
         return *this;
     }
 
+    bool hitTest(Bounds& x, Bounds& y) {
+    
+    }
 };

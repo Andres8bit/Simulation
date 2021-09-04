@@ -12,3 +12,7 @@ Vec operator*(const double& c, const Vec& y) {
 Vec operator-(const Vec& x, const Vec& y) {
     return Vec(x.x - y.x, x.y - y.y);
 }
+
+double dot(const Vec& x, const Vec& y){ 
+    return (x.x * y.x) + (x.y * y.y); 
+}
