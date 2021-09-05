@@ -95,5 +95,22 @@ void Plane::set_dims(double width, double hieght) {
 }
 
 Vec Plane::center_mass()const{
+    return Vec();
+}
 
+std::vector<Vec> Plane::vertices()const {
+    std::vector<Vec> objSides;
+    Vec ul = Vec(this->ui.left, this->ui.top);
+    Vec lr = Vec(this->ui.right, this->ui.bottom);
+    // ur ->  upper right -> (lr.x,ul.y)
+    Vec ur = Vec(lr.x, ul.y);
+    // ll -> lower left -> (ul.x,lr.y)
+    Vec ll = Vec(ul.x, lr.y);
+
+    objSides.push_back(ul);
+    objSides.push_back(ll);
+    objSides.push_back(lr);
+    objSides.push_back(ur);
+
+    return objSides;
 }

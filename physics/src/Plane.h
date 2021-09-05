@@ -16,6 +16,7 @@ public:
     Plane& operator=(const Plane& other);
 
     //Getters:
+    std::vector<Vec> vertices()const;
     Vec center_mass()const;
     // returns the upper left point
     Vec get_pos()const { return Vec(this->ui.left, this->ui.top); }

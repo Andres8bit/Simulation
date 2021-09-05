@@ -16,6 +16,7 @@ public:
     Sphere& operator=(const Sphere& other);
 
     //getters:
+    std::vector<Vec> vertices()const { };
     Vec center_mass()const { return get_pos(); }
     Vec get_pos()const { return Vec(ui.point.x, ui.point.y); };
     double get_mass()const { return mass; };
