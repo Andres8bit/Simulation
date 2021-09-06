@@ -8,6 +8,7 @@
 #include <tchar.h>
 #include <list>
 #include"Plane.h"
+#include"Collision.h"
 #include<windowsx.h>
 
 typedef Vec(*force)(Vec, const double&);
@@ -18,6 +19,7 @@ class Engine {
 private:
 	float xBounds;
 	float yBounds;
+	Collision collisions;
 	std::list<std::shared_ptr<Obj>> objs;
 	std::list<std::shared_ptr<Obj>>::iterator selection;
 	double time;

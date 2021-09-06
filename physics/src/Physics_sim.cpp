@@ -74,7 +74,7 @@ void Engine::add_obj(Obj& obj){
 
 
 void Engine::step(){
-
+    collision();
     for (auto i = objs.rbegin(); i != objs.rend(); ++i) {
        // apply(*(*i), CONST_ACC, time);
         apply(*(*i), CONST_ACC, time);
@@ -125,4 +125,18 @@ std::shared_ptr<Obj> Engine::Selection(){
     else {
         return(*selection);
     }
+}
+
+void Engine::collision() {
+    for (auto obj1 = objs.begin(); obj1 != objs.end(); obj1 = std::next(obj1,1)) {
+        for (auto obj2 = std::next(obj1,1); obj2 != objs.end(); obj2 = std::next(obj2,1)){
+            Obj* x = obj1->get();
+            Obj* y = obj2->get();
+
+            if (collisions.iscolliding(*x, *y)) {
+                MessageBox(NULL, L"collisions", L"colliding", MB_OK | MB_ICONQUESTION);
+            }
+        }
+    }
+
 }

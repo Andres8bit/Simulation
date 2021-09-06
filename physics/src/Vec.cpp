@@ -27,3 +27,10 @@ Vec operator/(const Vec& y, const double& x) {
     }
     return y;
 }
+
+double distance(const Vec& x, const Vec& y) {
+    double xDel = (y.x - x.x) * (y.x - x.x);
+    double yDel = (y.y - x.y) * (y.y - y.x);
+
+    return sqrt(xDel + yDel);
+}

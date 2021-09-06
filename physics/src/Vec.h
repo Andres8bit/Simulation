@@ -24,4 +24,6 @@ struct Vec {
         Vec operator/(const Vec& y,const double& x );
     friend
         double magnitude(const Vec& x);
+    friend
+        double distance(const Vec& x, const Vec& y);
 };

@@ -83,3 +83,96 @@ std::vector<Vec> Collision::get_normals(const std::vector<Vec>& vertices)const {
 	}
 	return normals;
 }
+
+bool Collision::iscolliding(Obj& x, Obj& y) {
+
+	// base case both objects are convex objects other than spheres.
+	if (x.get_type() != TYPE::SPHERE && y.get_type() != TYPE::SPHERE){
+		// Use the seperate axis theorem
+	    // if it returns true there is a line we can draw 
+		// between our two objs. In which case they would 
+		// not be colliding.
+		MessageBox(NULL, L"collisions between two convex shapes", L"colliding", MB_OK | MB_ICONQUESTION);
+		return !this->seperate_axis_theorem(x.vertices(), y.vertices());
+	}
+
+	//Spheres require special case handling
+	// Two Spheres case:
+	if (x.get_type() == TYPE::SPHERE && y.get_type() == TYPE::SPHERE) {
+		//return true if the distance between the center of both circles
+		// is less than the sum on thier two radii.
+		Sphere xSphere = (Sphere)x;
+		Sphere ySphere = (Sphere)y;
+		MessageBox(NULL, L"collisions between two spheres", L"colliding", MB_OK | MB_ICONQUESTION);
+		return isSpheresColliding(xSphere, ySphere);
+	}
+
+    //last case only one object is a sphere.
+	//return true using special case
+	// we check the closest verices of the circle to the 
+	// other convex obj.
+	MessageBox(NULL, L"collisions between one sphere", L"colliding", MB_OK | MB_ICONQUESTION);
+	return isSphereObjColliding(x, y);		
+}
+
+bool Collision::isSphereObjColliding(Obj& x, Obj& y) {
+	std::vector<Vec> obj_vertices;
+	std::vector<Vec> circle_vertices;
+	Sphere sphere;
+	Vec circle_axis;
+	Vec center;
+	Vec nearestVert;
+	double radius;
+	double min = std::numeric_limits<double>::infinity();
+	double curDist;
+	double mag;
+	// if x is not the sphere then get all of its vertices
+	if (x.get_type() != TYPE::SPHERE) {
+		   sphere = (Sphere)y;
+		   obj_vertices.insert(
+			   obj_vertices.end(),
+			std::make_move_iterator(x.vertices().begin()),
+			std::make_move_iterator(x.vertices().end())
+		);
+
+		center = sphere.get_pos();
+		radius = sphere.get_radius();
+	}//otherwise get all the veritices of y
+	else {
+		sphere = (Sphere)x;
+		obj_vertices.insert(
+			obj_vertices.end(),
+			std::make_move_iterator(y.vertices().begin()),
+			std::make_move_iterator(y.vertices().end())
+		);
+
+		center = sphere.get_pos();
+		radius = sphere.get_radius();
+	}
+
+	//loop through all of the vertices of the obj
+	// find the closest vertex to the center of our circle
+	// this become the vertex we use to check collision
+	// using seperate axis theorem
+	for (auto vertex = obj_vertices.begin(); vertex != obj_vertices.end(); vertex++) {
+		curDist = distance(*vertex, center);
+		if (curDist < min) {
+			min = curDist;
+			nearestVert = *vertex;
+		}
+	}
+	mag = magnitude(nearestVert);
+	circle_axis = nearestVert - center;
+	if (mag) {
+		circle_axis = circle_axis / mag;
+	}
+	circle_vertices.push_back(circle_axis);
+	 
+	return seperate_axis_theorem(obj_vertices,circle_vertices);
+}
+
+bool Collision::isSpheresColliding(Sphere& x, Sphere& y) {
+	double radDist = x.get_radius() + y.get_radius();
+    
+	return sqrt(distance(x.get_pos(),y.get_pos())) < radDist;
+}
