@@ -13,8 +13,8 @@ Vec Collision::plane_to_plane(Plane& x, Plane& y) {
 
 //Returns the Vf of x after a collision with y
 Vec Collision::obj_to_obj(Obj& x, Obj& y) {
-	double mass_dif = x.get_mass() - y.get_mass();
-	double mass_sum = x.get_mass() + y.get_mass();
+	float mass_dif = x.get_mass() - y.get_mass();
+	float mass_sum = x.get_mass() + y.get_mass();
 
 	Vec firstTerm = ((mass_dif) / (mass_sum)) * x.get_vel();
 	Vec secondTerm = ((2 * y.get_mass()) / (mass_sum)) * y.get_vel();
@@ -22,64 +22,47 @@ Vec Collision::obj_to_obj(Obj& x, Obj& y) {
 	return firstTerm + secondTerm;
 }
 
-bool Collision::seperate_axis_theorem(const std::vector<Vec>& obj1,const std::vector<Vec>& obj2)const{
-	std::vector<Vec> axis1 = this->get_normals(obj1);
-	std::vector<Vec> axis2 = this->get_normals(obj2);
+bool Collision::seperate_axis_theorem(const std::vector<Vec>& x_vertices, const std::vector<Vec>& y_vertices)const {
+	std::vector<Vec> x_edges = get_normals(x_vertices);
+	std::vector<Vec> y_edges = get_normals(y_vertices);
 
-	// concatenate both sets of orthogonal normals/ edge normals
-	// to iterate over
-	axis2.insert(
-		axis2.end(),
-		std::make_move_iterator(axis1.begin()),
-		std::make_move_iterator(axis2.end())
-	);
+	for (auto axis = x_edges.begin(); std::next(axis, 1) != x_edges.end(); axis = std::next(axis, 1)) {
+		float max_x_proj = std::numeric_limits<float>::lowest();
+		float min_x_proj = std::numeric_limits<float>::infinity();
+		float max_y_proj = std::numeric_limits<float>::lowest();
+		float min_y_proj = std::numeric_limits<float>::infinity();
 
-	double max_a_proj = std::numeric_limits<double>::lowest();
-	double min_a_proj = std::numeric_limits<double>::infinity();
-
-	double max_b_proj = std::numeric_limits<double>::lowest();
-	double min_b_proj = std::numeric_limits<double>::infinity();
-	
-	double projection = 0.0;
-	
-	for (auto axis = axis2.begin(); axis != axis2.end(); axis++) {
-		
-		for (auto vertex = obj1.begin(); vertex != obj1.end(); vertex++) {
-			projection = dot(*vertex, *axis);
-			min_a_proj = min(min_a_proj, projection);
-			max_a_proj = max(max_a_proj, projection);
+		for (auto x_vertex = x_vertices.begin(); std::next(x_vertex, 1) != x_vertices.end(); x_vertex = std::next(x_vertex, 1)) {
+			float projection = dot(*axis, *x_vertex);
+			max_x_proj = max(projection, max_x_proj);
+			min_x_proj = min(projection, min_x_proj);
 		}
 
-		for (auto vertex = obj2.begin(); vertex != obj2.end(); vertex++) {
-			projection = dot(*vertex, *axis);
-			min_b_proj = min(min_b_proj, projection);
-			max_b_proj = max(max_b_proj, projection);
+		for (auto y_vertex = y_vertices.begin(); std::next(y_vertex, 1) != y_vertices.end(); y_vertex = std::next(y_vertex, 1)) {
+			float projection = dot(*axis, *y_vertex);
+			max_y_proj = max(projection, max_y_proj);
+			min_y_proj = min(projection, min_y_proj);
 		}
 
-		// if projections of each object do not overlap on axis
-		// return true -> theres is a seperating axis between the two
-		if (max_a_proj >= min_b_proj && max_b_proj >= min_a_proj) {
+		if (max_x_proj < min_y_proj || min_x_proj > max_y_proj) {
 			return true;
 		}
-		
-	}
 
-	//if out of loop then projections on all axis overlap -> no seperating axis
+	}
 	return false;
 }
 
-std::vector<Vec> Collision::get_normals(const std::vector<Vec>& vertices)const {
+std::vector<Vec> Collision::get_normals(const std::vector<Vec>& vertices) const{
 	std::vector<Vec> normals;
 
-	for (auto vert = vertices.begin(); vert != vertices.end(); vert++) {
-		Vec p1 = *vert;
-		Vec p2 = ((vert + 1) == vertices.end()) ? vertices.front() : *(vert + 1);
-		Vec edge = p2 - p1;
-		Vec edge_normal = Vec(-1 * edge.y, edge.x);
-		double mag = magnitude(edge_normal);
+	for (int i = 0; i < vertices.size(); i++) {
+		Vec start = vertices.at(i);
+		Vec end = i + 1 == vertices.size() ? vertices.at(0) : vertices.at(1 + i);
 
+		Vec edge_normal = end - start;
+		edge_normal = perp(norm(edge_normal));
+		normals.push_back(edge_normal);
 
-		normals.push_back(edge_normal/mag);
 	}
 	return normals;
 }
@@ -88,91 +71,80 @@ bool Collision::iscolliding(Obj& x, Obj& y) {
 
 	// base case both objects are convex objects other than spheres.
 	if (x.get_type() != TYPE::SPHERE && y.get_type() != TYPE::SPHERE){
-		// Use the seperate axis theorem
-	    // if it returns true there is a line we can draw 
-		// between our two objs. In which case they would 
-		// not be colliding.
-		MessageBox(NULL, L"collisions between two convex shapes", L"colliding", MB_OK | MB_ICONQUESTION);
 		return !this->seperate_axis_theorem(x.vertices(), y.vertices());
 	}
 
-	//Spheres require special case handling
-	// Two Spheres case:
+	// both objects are spheres
 	if (x.get_type() == TYPE::SPHERE && y.get_type() == TYPE::SPHERE) {
-		//return true if the distance between the center of both circles
-		// is less than the sum on thier two radii.
 		Sphere xSphere = (Sphere)x;
 		Sphere ySphere = (Sphere)y;
-		MessageBox(NULL, L"collisions between two spheres", L"colliding", MB_OK | MB_ICONQUESTION);
 		return isSpheresColliding(xSphere, ySphere);
 	}
 
-    //last case only one object is a sphere.
-	//return true using special case
-	// we check the closest verices of the circle to the 
-	// other convex obj.
-	MessageBox(NULL, L"collisions between one sphere", L"colliding", MB_OK | MB_ICONQUESTION);
-	return isSphereObjColliding(x, y);		
+	// one object is a sphere
+	if (x.get_type() == TYPE::SPHERE) {
+		Sphere temp = x;
+		return isSphereObjColliding(temp, y);
+	}
+	else {
+		Sphere temp = y;
+		return isSphereObjColliding(temp, x);
+	}
 }
 
-bool Collision::isSphereObjColliding(Obj& x, Obj& y) {
-	std::vector<Vec> obj_vertices;
-	std::vector<Vec> circle_vertices;
-	Sphere sphere;
-	Vec circle_axis;
-	Vec center;
-	Vec nearestVert;
-	double radius;
-	double min = std::numeric_limits<double>::infinity();
-	double curDist;
-	double mag;
-	// if x is not the sphere then get all of its vertices
-	if (x.get_type() != TYPE::SPHERE) {
-		   sphere = (Sphere)y;
-		   obj_vertices.insert(
-			   obj_vertices.end(),
-			std::make_move_iterator(x.vertices().begin()),
-			std::make_move_iterator(x.vertices().end())
-		);
+bool Collision::isSphereObjColliding(Sphere& x, Obj& y) {
+	Vec axis;
+	Vec center = x.get_pos();
+	float radius = x.get_radius();
+	float minDist = std::numeric_limits<float>::infinity();
+	std::vector<Vec> vertices = y.vertices();
+	std::vector<Vec> edge_normals = get_normals(vertices);
 
-		center = sphere.get_pos();
-		radius = sphere.get_radius();
-	}//otherwise get all the veritices of y
-	else {
-		sphere = (Sphere)x;
-		obj_vertices.insert(
-			obj_vertices.end(),
-			std::make_move_iterator(y.vertices().begin()),
-			std::make_move_iterator(y.vertices().end())
-		);
+	float max_y_proj = std::numeric_limits<float>::lowest();
+	float min_y_proj = std::numeric_limits<float>::infinity();
+	size_t n = vertices.size();
+	Vec nearest;
 
-		center = sphere.get_pos();
-		radius = sphere.get_radius();
+	for (size_t i = 0; i < n; i++) {
+		float temp = distance(center, vertices.at(i));
+		minDist = min(temp, minDist);	
+		nearest = minDist == temp ? vertices.at(i) : nearest;
 	}
 
-	//loop through all of the vertices of the obj
-	// find the closest vertex to the center of our circle
-	// this become the vertex we use to check collision
-	// using seperate axis theorem
-	for (auto vertex = obj_vertices.begin(); vertex != obj_vertices.end(); vertex++) {
-		curDist = distance(*vertex, center);
-		if (curDist < min) {
-			min = curDist;
-			nearestVert = *vertex;
+	std::vector<Vec>temp;
+	temp.push_back(center);
+	temp.push_back(nearest);
+
+	return seperate_axis_theorem(temp, y.vertices());
+	
+	/*float circle_proj = dot(axis, center);
+	float circle_min = circle_proj - radius;
+	float circle_max = circle_proj + radius;
+
+
+	for (auto vertex = edge_normals.begin(); std::next(vertex, 1) != edge_normals.end(); vertex = std::next(vertex, 1)) {
+		float projection = dot(axis, *vertex);
+
+		max_y_proj = max(projection, max_y_proj);
+		min_y_proj = min(projection, min_y_proj);
+
+
+		if (circle_max < min_y_proj || circle_min > max_y_proj) {
+			return true;
 		}
 	}
-	mag = magnitude(nearestVert);
-	circle_axis = nearestVert - center;
-	if (mag) {
-		circle_axis = circle_axis / mag;
-	}
-	circle_vertices.push_back(circle_axis);
-	 
-	return seperate_axis_theorem(obj_vertices,circle_vertices);
+
+
+
+
+	return false;
+	*/
 }
 
 bool Collision::isSpheresColliding(Sphere& x, Sphere& y) {
-	double radDist = x.get_radius() + y.get_radius();
-    
-	return sqrt(distance(x.get_pos(),y.get_pos())) < radDist;
+	float radDist = abs(x.get_radius() + y.get_radius());
+
+	float centerDistance = distance(x.get_pos(), y.get_pos());
+
+	return radDist >= centerDistance;
 }

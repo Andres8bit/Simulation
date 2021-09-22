@@ -2,7 +2,6 @@
 #include<math.h>
 #include "resource.h"
 #include "Sphere.h"
-#include "Force.h"
 #include<string>
 #include <iostream>
 #include <tchar.h>
@@ -11,7 +10,7 @@
 #include"Collision.h"
 #include<windowsx.h>
 
-typedef Vec(*force)(Vec, const double&);
+typedef Vec(*force)(Vec, const float&);
 typedef Vec(*fx)(Vec);
 
 enum FUNC { CONST_ACC, ACC, VEL };
@@ -22,8 +21,8 @@ private:
 	Collision collisions;
 	std::list<std::shared_ptr<Obj>> objs;
 	std::list<std::shared_ptr<Obj>>::iterator selection;
-	double time;
-	void apply(Obj& x, FUNC f, double t);
+	float time;
+	void apply(Obj& x, FUNC f, float t);
 	Vec Impulse() {};
 	void collision();
 

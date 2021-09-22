@@ -1,6 +1,6 @@
 #include "Plane.h"
 
-Plane::Plane(double x, double y, double w, double h) {
+Plane::Plane(float x, float y, float w, float h) {
     Vec uL = Vec(x, y);
     Vec lR = Vec(x+w,y+h);
     this->ui.top = uL.y;
@@ -89,7 +89,7 @@ Vec Plane::get_dims()const
 
 }
 
-void Plane::set_dims(double width, double hieght) {
+void Plane::set_dims(float width, float hieght) {
     this->ui.right = this->ui.left + width;
     this->ui.bottom = this->ui.top + hieght;
 }

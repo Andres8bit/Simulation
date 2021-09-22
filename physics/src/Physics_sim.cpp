@@ -1,6 +1,6 @@
 #include "Physics_sim.h"
 
-Vec runge_kutta(const Vec& x, force f, const double& t, const double& h, const size_t& n) {
+Vec runge_kutta(const Vec& x, force f, const float& t, const float& h, const size_t& n) {
     Vec k1, k2, k3, k4;
     Vec y = Vec(x.x, x.y);
 
@@ -13,34 +13,22 @@ Vec runge_kutta(const Vec& x, force f, const double& t, const double& h, const s
     }
     return y;
 }
-Vec earth_grav(Vec x, const double& t) {
+Vec earth_grav(Vec x, const float& t) {
     return Vec(0, 9.8);
 }
-Vec force_field(Vec x, const double& t) {
+Vec force_field(Vec x, const float& t) {
     return Vec(2*cos(x.y),2*sin(4*x.y));
 }
 void apply_force_field(Obj& x, force f, Vec bounds) {
     Vec temp = runge_kutta(x.get_pos(), f, .1, 1, 1);
     Bounds check(x.get_pos(), temp);
-    
-    char buff[100];
-    sprintf_s(buff, "name is:%s", f);
-    std::cout << buff;
-    std::wstring name = L"stackoverflow";
-
-    //MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
     if ((check.lowerR.x >= 0 && check.upperL.x < bounds.x) && (check.lowerR.y >= 0 && check.upperL.y < bounds.y))
         x.set_pos(temp);
 }
 
 void grav(Obj& x, force f, Vec bounds) {
     Vec pos = runge_kutta(x.get_pos(), f, 1, 1, 1);
-    char buff[100];
-    sprintf_s(buff, "name is:%s", f);
-    std::cout << buff;
-    std::wstring name = L"stackoverflow";
 
-    //MessageBox(NULL, (L"name is: " + std::to_wstring(pos.x)).c_str(), L"Msg title", MB_OK | MB_ICONQUESTION);
     if((x.bounds().lowerR.x  >= 0 && x.bounds().upperL.x  < bounds.x) && (x.bounds().lowerR.y >= 0 && x.bounds().upperL.y < bounds.y))
          x.set_pos(pos);
 }
@@ -58,7 +46,6 @@ Engine::~Engine() {
 }
 
 void Engine::add_obj(Obj& obj){
-   // MessageBox(NULL, L"adding", L"engine", NULL);
     if (obj.get_type() == TYPE::SPHERE) {
         selection = objs.insert(
             objs.end(),
@@ -76,7 +63,6 @@ void Engine::add_obj(Obj& obj){
 void Engine::step(){
     collision();
     for (auto i = objs.rbegin(); i != objs.rend(); ++i) {
-       // apply(*(*i), CONST_ACC, time);
         apply(*(*i), CONST_ACC, time);
     }
 }
@@ -86,12 +72,11 @@ void Engine::step(){
 void Engine::render(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush) {
     
     for (auto i = objs.rbegin(); i != objs.rend(); ++i) {
-        // apply(*(*i), CONST_ACC, time);
         (*i)->Draw(pRT, pBrush);
     }
 
 }
-void Engine::apply(Obj& x, FUNC f, double t) {
+void Engine::apply(Obj& x, FUNC f, float t) {
 
     switch (f)
     {
@@ -134,9 +119,8 @@ void Engine::collision() {
             Obj* y = obj2->get();
 
             if (collisions.iscolliding(*x, *y)) {
-                MessageBox(NULL, L"collisions", L"colliding", MB_OK | MB_ICONQUESTION);
+                MessageBox(NULL, L"colliding", L"colliding", MB_OK | MB_ICONQUESTION);
             }
         }
     }
-
 }

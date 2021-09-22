@@ -21,7 +21,6 @@ public:
 
     {
         FLOAT dpiX, dpiY;
-        // LogicalDpi{ get; }
         auto x = GetDpiForWindow(hwnd);
         scaleX = x / 96.0f;
         scaleY = x / 96.0f;
@@ -128,8 +127,6 @@ void MainWindow::Render() {
         eng.render(pRenderTarget, pBrush);
         if (eng.Selection()) {
             (eng.Selection())->Draw(pRenderTarget,pBrush);
-            //pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-            //pRenderTarget->DrawEllipse(eng.Selection()->get_ui(), pBrush, 2.0f);
         }
 
         //signals the end of drawing.
@@ -176,15 +173,10 @@ HRESULT MainWindow::InsertSphere(float x, float y) {
         Sphere temp;
         temp.set_pos(Vec(x, y));
         temp.set_color(D2D1::ColorF(colors[nextColor]));
-        temp.set_raduis(2.0f);
+        temp.set_radius(2.0f);
         eng.add_obj(temp);
         ((Sphere*)eng.Selection().get())->set_color(D2D1::ColorF(colors[nextColor]));
         ptMouse = D2D1::Point2F(x, y);
-        //eng.Selection()->set_pos(Vec(x,y));
-        //if(eng.Selection()->get_type() == TYPE::SPHERE)
-          //  eng.Selection()->set_raduis(2.0f);
-        //eng.Selection()->set_color(D2D1::ColorF(colors[nextColor]));
-   
         nextColor = (nextColor + 1) % ARRAYSIZE(colors);
     }
     catch (std::bad_alloc)
@@ -209,12 +201,12 @@ HRESULT MainWindow::CreateGraphicsResources()
         D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
 
         //Creates a render target window:
-        //      D2D1::RenderTargetProperties -> specifies options 
-        //                                      that are common to any type of  
-        //                                      render target.
+        //      D2D1::RenderTargetProperties     ->  specifies options 
+        //                                           that are common to any type of  
+        //                                           render target.
         //      D2D1::HwndRenderTargetProperties -> Specifies handle to window 
         //                                          + size of render target in px  
-        //      &pRenderTarget -> pointer to ID21HwndRenderTarget
+        //      &pRenderTarget                   -> pointer to ID21HwndRenderTarget
         hr = pFactory->CreateHwndRenderTarget(
             D2D1::RenderTargetProperties(),
             D2D1::HwndRenderTargetProperties(m_hwnd, size),
@@ -290,14 +282,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
     MainWindow win;
 
-    if (!win.Create(L"Circle", WS_OVERLAPPEDWINDOW))
+    if (!win.Create(L"Collision Engine", WS_OVERLAPPEDWINDOW))
     {
         return 0;
     }
 
     ShowWindow(win.Window(), nCmdShow);
 
-    // Run the message loop.
 
     MSG msg;
     msg.message = WM_NULL;
@@ -411,18 +402,15 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
     {
         if (mode == DrawMode) {
             Vec dims = Vec((dipX - ptMouse.x) / 2, (dipY - ptMouse.y) / 2);
-            //const float width = (dipX - ptMouse.x) / 2;
-            //const float height = (dipY - ptMouse.y) / 2;
-            //const float x1 = ptMouse.x + width;
-            //const float y1 = ptMouse.y + height;
             Vec posF = Vec(ptMouse.x + dims.x, ptMouse.y + dims.y);
             TYPE objType = eng.Selection()->get_type();
+
             eng.Selection()->set_pos(Vec(posF.x, posF.y));
             std::shared_ptr<Obj> temp = eng.Selection();
             resizeObj(temp,posF,dims);            
         }
         else if (mode == DragMode) {
-            eng.Selection()->set_pos(Vec(dipX + double(ptMouse.x), dipY + double(ptMouse.y)));
+            eng.Selection()->set_pos(Vec(dipX + float(ptMouse.x), dipY + float(ptMouse.y)));
         }
        InvalidateRect(m_hwnd, NULL, FALSE);
     }
@@ -464,7 +452,6 @@ HRESULT MainWindow::InsertObj(float x, float y) {
 
         if (obj_mode == TYPE::PLANE) {
             InsertRect(x, y);
-            //MessageBox(NULL, L"should be plane ", L"Msg title", MB_OK | MB_ICONQUESTION);
         }
 
         if (obj_mode == TYPE::TRIANGLE) {
@@ -483,18 +470,12 @@ HRESULT MainWindow::InsertObj(float x, float y) {
 HRESULT MainWindow::InsertRect(float x, float y) {
     try
     {
-        Plane temp(Vec((double)x,(double)y),Vec((double)x+2, (double)y+2));
+        Plane temp(Vec((float)x,(float)y),Vec((float)x+2, (float)y+2));
         temp.set_pos(Vec(x,y));
         eng.add_obj(temp);
-        //eng.Selection().get()->set_pos(Vec(x, y));
         eng.Selection().get()->set_color(D2D1::ColorF(colors[nextColor]));
         ptMouse = D2D1::Point2F(x, y);
- 
-        //eng.Selection()->set_pos(Vec(x,y));
-        //if(eng.Selection()->get_type() == TYPE::SPHERE)
         ((Plane*)eng.Selection().get())->set_dims(2.0f,2.0f);
-        //eng.Selection()->set_color(D2D1::ColorF(colors[nextColor]));
-
         nextColor = (nextColor + 1) % ARRAYSIZE(colors);
     }
     catch (std::bad_alloc)
@@ -513,7 +494,7 @@ void MainWindow::resizeObj(std::shared_ptr<Obj>& obj,Vec& pos,Vec& dims) {
 
     switch (objType) {
     case TYPE::SPHERE:
-        ((Sphere*)obj.get())->set_raduis(dims.y);
+        ((Sphere*)obj.get())->set_radius(abs(dims.y));
         break;
     case TYPE::PLANE:
         ((Plane*)obj.get())->set_dims(dims.x,dims.y);

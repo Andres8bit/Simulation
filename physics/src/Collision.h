@@ -10,7 +10,7 @@ class Collision
 private:
 	std::vector<Vec> get_normals(const std::vector<Vec>& vertices)const;
 	bool seperate_axis_theorem(const std::vector<Vec>& obj1, const std::vector<Vec>& obj2)const;
-	bool isSphereObjColliding(Obj& x, Obj& y);
+	bool isSphereObjColliding(Sphere& x, Obj& y);
 	bool isSpheresColliding(Sphere& x,Sphere& y);
 public:
 	 Vec obj_to_obj(Obj& x, Obj& y);

@@ -7,7 +7,7 @@ class Plane: public Obj
 public:
     //(x,y) -> upper left
     //(w,h) -> width & hieght of plane
-    Plane(double x = 0, double y = 0, double w = 1, double h = 1);
+    Plane(float x = 0, float y = 0, float w = 1, float h = 1);
     // uL -> upper left point of plane
     // lR -> lower right point of plane
     Plane(Vec uL, Vec lR);
@@ -30,7 +30,7 @@ public:
     // and resets lower right point
     // in keeping with change to upperL and dims
     void set_pos(Vec pos);
-    void set_dims(double width, double hieght);
+    void set_dims(float width, float hieght);
     void Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush);
     BOOL HitTest(float x, float y);
     Bounds bounds();

@@ -3,7 +3,9 @@ Sphere::Sphere(const Sphere& s) {
 	copy(s);
 }
 
-Sphere::Sphere(Vec center, double radius) {
+Sphere::Sphere(Vec center, float radius) {
+	this->center = center;
+	this->radius = radius;
 	ui.point.x = center.x;
 	ui.point.y = center.y;
 	ui.radiusX = ui.radiusY = radius;
@@ -11,7 +13,9 @@ Sphere::Sphere(Vec center, double radius) {
 	color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 
-Sphere::Sphere(double xpos, double ypos, double radius) {
+Sphere::Sphere(float xpos, float ypos, float radius) {
+	this->center = Vec(xpos, ypos);
+	this->radius = radius;
 	ui.point.x = xpos;
 	ui.point.y = ypos;
 	ui.radiusX = ui.radiusY = radius;
@@ -49,13 +53,13 @@ BOOL Sphere:: HitTest(float x, float y) {
 }
 
 void Sphere::copy(const Sphere& s){
-	Vec center = s.get_pos();
-	double r = s.get_radius();
-	ui.point.x = center.x;
-	ui.point.y = center.y;
-	ui.radiusX = ui.radiusY = r;
-	//need to add get color function.
-	color = color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
+	this->center = s.get_pos();
+	this->radius = s.get_radius();
+	this->ui.point.x = this->center.x;
+	this->ui.point.y = this->center.y;
+	this->ui.radiusX = this->ui.radiusY = this->radius;
+
+	color = s.get_color();
 	set_mass(s.get_mass());
 	set_acc(s.get_acc());
 	set_vel(s.get_vel());
@@ -64,10 +68,21 @@ void Sphere::copy(const Sphere& s){
 
 Bounds Sphere::bounds() {
 	Vec center = Vec(this->ui.point.x, this->ui.point.y);
-	double r = this->ui.radiusX;
+	float r = this->ui.radiusX;
 
 	Vec upperL = center - Vec(r, r);// top Left is center - radius
 	Vec lowerR = center + Vec(r, r);// lower right is center + radius 
 
      return Bounds(upperL, lowerR);
 }
+
+void Sphere::set_pos(Vec pos){ 
+	center.x = pos.x;
+	ui.point.x = pos.x;
+	center.y = pos.y;
+	ui.point.y = pos.y;
+}
+
+void Sphere::set_radius(float r) {
+	radius = r; 
+	ui.radiusX = ui.radiusY = r; }
