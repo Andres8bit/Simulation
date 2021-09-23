@@ -12,6 +12,7 @@ private:
 	bool seperate_axis_theorem(const std::vector<Vec>& obj1, const std::vector<Vec>& obj2)const;
 	bool isSphereObjColliding(Sphere& x, Obj& y);
 	bool isSpheresColliding(Sphere& x,Sphere& y);
+	Vec getNearestPoint(const Sphere& sphere, const Obj& obj)const;
 public:
 	 Vec obj_to_obj(Obj& x, Obj& y);
 	 Vec sphere_to_sphere(Sphere& x, Sphere& y);

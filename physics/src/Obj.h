@@ -2,6 +2,8 @@
 #pragma once
 #include <d2d1.h>
 #include<WinUser.h>
+#include<iostream>
+#include<vector>
 #pragma comment(lib, "d2d1")
 
 enum class TYPE { BASE,SPHERE, TRIANGLE, PLANE };
@@ -9,19 +11,22 @@ class Obj {
 public:
     Obj();
     Obj(Obj& x) { copy(x); };
+
     //getters:
+    virtual std::vector<Vec> vertices()const = 0;
     virtual Vec get_pos()const = 0;
     virtual Vec center_mass()const = 0;
-    double get_mass()const { return this->mass; }
+    float get_mass()const { return this->mass; }
     TYPE get_type()const { return this->type; }
     Vec get_vel()const { return this->vel; }
     Vec get_acc()const { return this->acc; }
     Vec linear_momentum()const { return this->mass * this->vel; }
     Vec rotation()const { return this->angle_of_rotation; }
     D2D1_COLOR_F get_color()const { return this->color; }
-    //setter:
+    
+    //setters:
     virtual void set_pos(const Vec pos) = 0;
-    void set_mass(double val) { this->mass = val; }
+    void set_mass(float val) { this->mass = val; }
     void set_vel(Vec val) { this->vel = val; }
     void set_acc(Vec val) { this->acc = val; }
     void set_type(TYPE val) { this->type = val; }
@@ -36,7 +41,7 @@ protected:
     D2D1_COLOR_F    color;
     Vec vel;
     Vec acc;
-    double mass;
-    double angle_of_rotation;
+    float mass;
+    float angle_of_rotation;
     TYPE type;
 };

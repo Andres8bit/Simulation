@@ -26,19 +26,19 @@ bool Collision::seperate_axis_theorem(const std::vector<Vec>& x_vertices, const 
 	std::vector<Vec> x_edges = get_normals(x_vertices);
 	std::vector<Vec> y_edges = get_normals(y_vertices);
 
-	for (auto axis = x_edges.begin(); std::next(axis, 1) != x_edges.end(); axis = std::next(axis, 1)) {
+	for (auto axis = x_edges.begin(); axis != x_edges.end(); axis = std::next(axis, 1)) {
 		float max_x_proj = std::numeric_limits<float>::lowest();
 		float min_x_proj = std::numeric_limits<float>::infinity();
 		float max_y_proj = std::numeric_limits<float>::lowest();
 		float min_y_proj = std::numeric_limits<float>::infinity();
 
-		for (auto x_vertex = x_vertices.begin(); std::next(x_vertex, 1) != x_vertices.end(); x_vertex = std::next(x_vertex, 1)) {
+		for (auto x_vertex = x_vertices.begin(); x_vertex != x_vertices.end(); x_vertex = std::next(x_vertex, 1)) {
 			float projection = dot(*axis, *x_vertex);
 			max_x_proj = max(projection, max_x_proj);
 			min_x_proj = min(projection, min_x_proj);
 		}
 
-		for (auto y_vertex = y_vertices.begin(); std::next(y_vertex, 1) != y_vertices.end(); y_vertex = std::next(y_vertex, 1)) {
+		for (auto y_vertex = y_vertices.begin(); y_vertex != y_vertices.end(); y_vertex = std::next(y_vertex, 1)) {
 			float projection = dot(*axis, *y_vertex);
 			max_y_proj = max(projection, max_y_proj);
 			min_y_proj = min(projection, min_y_proj);
@@ -93,52 +93,91 @@ bool Collision::iscolliding(Obj& x, Obj& y) {
 }
 
 bool Collision::isSphereObjColliding(Sphere& x, Obj& y) {
-	Vec axis;
+
 	Vec center = x.get_pos();
 	float radius = x.get_radius();
-	float minDist = std::numeric_limits<float>::infinity();
+	Vec nearest; 
+	Vec axis; 
+	Vec radiusOffset;
+	Vec centerPlusOffset;
+	Vec centerMinusOffset;
 	std::vector<Vec> vertices = y.vertices();
 	std::vector<Vec> edge_normals = get_normals(vertices);
+	float max_obj_proj = std::numeric_limits<float>::lowest();
+	float min_obj_proj = std::numeric_limits<float>::infinity();
+	float max_sphere_proj = std::numeric_limits<float>::lowest();
+	float min_sphere_proj = std::numeric_limits<float>::infinity();
 
-	float max_y_proj = std::numeric_limits<float>::lowest();
-	float min_y_proj = std::numeric_limits<float>::infinity();
-	size_t n = vertices.size();
-	Vec nearest;
 
-	for (size_t i = 0; i < n; i++) {
-		float temp = distance(center, vertices.at(i));
-		minDist = min(temp, minDist);	
-		nearest = minDist == temp ? vertices.at(i) : nearest;
+	//now check along the axis created using the center of the circle
+	// to the nearest point in the other shape.
+	max_obj_proj = std::numeric_limits<float>::lowest();
+	min_obj_proj = std::numeric_limits<float>::infinity();
+	max_sphere_proj = std::numeric_limits<float>::lowest();
+	min_sphere_proj = std::numeric_limits<float>::infinity();
+	nearest = getNearestPoint(x, y);
+	axis = nearest - center;
+	axis = norm(axis);
+
+	// get circle projections
+	Vec direction = axis;
+	radiusOffset = radius * direction;
+	centerPlusOffset = center + radiusOffset;
+	centerMinusOffset = center - radiusOffset;
+	max_sphere_proj = dot(axis, centerMinusOffset);
+	min_sphere_proj = dot(axis, centerPlusOffset);
+	if (max_sphere_proj < min_sphere_proj) {
+		float temp = min_sphere_proj;
+		min_sphere_proj = max_sphere_proj;
+		max_sphere_proj = temp;
 	}
 
-	std::vector<Vec>temp;
-	temp.push_back(center);
-	temp.push_back(nearest);
 
-	return seperate_axis_theorem(temp, y.vertices());
-	
-	/*float circle_proj = dot(axis, center);
-	float circle_min = circle_proj - radius;
-	float circle_max = circle_proj + radius;
-
-
-	for (auto vertex = edge_normals.begin(); std::next(vertex, 1) != edge_normals.end(); vertex = std::next(vertex, 1)) {
+	for (auto vertex = vertices.begin(); vertex != vertices.end(); vertex = std::next(vertex, 1)) {
 		float projection = dot(axis, *vertex);
+		max_obj_proj = max(max_obj_proj, projection);
+		min_obj_proj = min(min_obj_proj, projection);
+		if (max_sphere_proj < min_obj_proj || min_sphere_proj > max_obj_proj) {
+			return false;
+		}
 
-		max_y_proj = max(projection, max_y_proj);
-		min_y_proj = min(projection, min_y_proj);
+	}
 
 
-		if (circle_max < min_y_proj || circle_min > max_y_proj) {
-			return true;
+
+
+
+	for (auto obj_axis = edge_normals.begin(); obj_axis != edge_normals.end(); obj_axis = std::next(obj_axis, 1)) {
+
+		// get the largest and smalled project of the obj along each axis
+		for (auto vertex = vertices.begin(); vertex != vertices.end(); vertex = std::next(vertex, 1)) {
+			float vert_projection = dot(*obj_axis, *vertex);
+			max_obj_proj = max(max_obj_proj, vert_projection);
+			min_obj_proj = min(min_obj_proj, vert_projection);
+		}
+		// project each "edge" from the center to outer edge of  circle
+		// then return largest and smallest projections.
+		Vec direction = norm(*obj_axis);
+		radiusOffset = radius * direction;
+
+		centerPlusOffset = center + radiusOffset;
+		centerMinusOffset = center - radiusOffset;
+
+		max_sphere_proj = dot(*obj_axis, centerMinusOffset);
+		min_sphere_proj = dot(*obj_axis, centerPlusOffset);
+
+		if (max_sphere_proj < min_sphere_proj) {
+			float temp = min_sphere_proj;
+			min_sphere_proj = max_sphere_proj;
+			max_sphere_proj = temp;
+		}
+
+		if (max_sphere_proj < min_obj_proj || min_sphere_proj > max_obj_proj) {
+			return false;
 		}
 	}
 
-
-
-
-	return false;
-	*/
+	return true;
 }
 
 bool Collision::isSpheresColliding(Sphere& x, Sphere& y) {
@@ -147,4 +186,20 @@ bool Collision::isSpheresColliding(Sphere& x, Sphere& y) {
 	float centerDistance = distance(x.get_pos(), y.get_pos());
 
 	return radDist >= centerDistance;
+}
+
+Vec Collision::getNearestPoint(const Sphere& sphere, const Obj& obj)const {
+	float minDist = std::numeric_limits<float>::infinity();
+	std::vector<Vec> vertices = obj.vertices();
+	Vec center = sphere.get_pos();
+	Vec nearest;
+	size_t n = vertices.size();
+
+	for (size_t i = 0; i < n; i++) {
+		float temp = distance(center, vertices.at(i));
+		minDist = min(temp, minDist);
+		nearest = minDist == temp ? vertices.at(i) : nearest;
+	}
+
+	return nearest;
 }

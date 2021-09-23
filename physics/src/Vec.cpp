@@ -10,11 +10,12 @@ Vec operator*(const float& c, const Vec& y) {
 }
 
 Vec operator-(const Vec& x, const Vec& y) {
-    return Vec(x.x - y.x, x.y - y.y);
+    Vec temp = -1*y;
+    return x + temp;
 }
 
 float dot(const Vec& x, const Vec& y){ 
-    return (x.x * y.x) + (x.y * y.y); 
+    return x.x * y.x + x.y * y.y; 
 }
 
 float magnitude(const Vec& x) {
