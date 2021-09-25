@@ -8,7 +8,6 @@ Plane::Plane(float x, float y, float w, float h) {
     this->ui.bottom = lR.y;
     this->ui.right = lR.x;
    // this->ui = D2D1_RECT_F();
-   this->type = TYPE::PLANE;
    this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 Plane::Plane(Vec uL, Vec lR) {
@@ -17,7 +16,6 @@ Plane::Plane(Vec uL, Vec lR) {
     this->ui.right = lR.x;
     this->ui.bottom = lR.y;
 
-    this->type = TYPE::PLANE;
 //    this->ui = D2D1_RECT_F();
     this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
@@ -45,7 +43,6 @@ void Plane::copy(const Plane& x) {
     this->acc = x.get_acc();
     this->mass = x.get_mass();
     this->vel = x.get_vel();
-    this->type = x.get_type();
     this->ui.left = pos.x;
     this->ui.top = pos.y;
     this->ui.right = dims.x;

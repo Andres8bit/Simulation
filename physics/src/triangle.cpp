@@ -6,8 +6,27 @@ Triangle::Triangle(const Vec& a, const Vec& b, const Vec& c) {
 	this->B.y = b.y;
 	this->C.x = c.x;
 	this->C.y = c.y;
+
+	this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
+
+Triangle::Triangle(const Vec& a, const Vec& b) {
+	this->A.x = a.x;
+	this->A.y = a.y;
+	this->B.x = b.x;
+	this->B.y = b.y;
+	// analytical solution for third point of equilateral triangle.
+	this->C.x = 0.5 * ((double)b.x + a.x) + (sqrt(3) / 2) * ((double)b.y - a.y);
+	this->C.y = 0.5 * ((double)b.y + a.y) + (sqrt(3) / 2) * ((double)b.x - a.x);
+	
+	this->color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
+}
+
+
 Triangle::Triangle(const Triangle& other) {
+	copy(other);
+}
+Triangle::Triangle(const Obj& other) {
 	copy(other);
 }
 
@@ -33,13 +52,15 @@ void Triangle::Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush){
 			if (SUCCEEDED(hr)) {
 				hr = pGeometry->Open(&psink);
 				if (SUCCEEDED(hr)) {
+					D2D1_POINT_2F pointA = VecToD2D1(A);
+					D2D1_POINT_2F pointB = VecToD2D1(B);
+					D2D1_POINT_2F pointC = VecToD2D1(C);
 					psink->BeginFigure(
-						this->A,
+						 pointA,
 						D2D1_FIGURE_BEGIN_FILLED
 					);
-
-					psink->AddLine(B);
-					psink->AddLine(C);
+					psink->AddLine(pointB);
+					psink->AddLine(pointC);
 					psink->EndFigure(D2D1_FIGURE_END_CLOSED);
 					hr = psink->Close();
 				}
@@ -47,7 +68,6 @@ void Triangle::Draw(ID2D1RenderTarget* pRT, ID2D1SolidColorBrush* pBrush){
 			}
 		}
 	}
-
 }
 
 BOOL Triangle::HitTest(float x, float y) {
@@ -68,7 +88,7 @@ void Triangle::copy(const Triangle& other) {
 	set_mass(other.get_mass());
 	set_acc(other.get_acc());
 	set_vel(other.get_vel());
-	type = TYPE::TRIANGLE;
+
 }
 
 
@@ -83,8 +103,9 @@ std::vector<Vec> Triangle::vertices()const {
 }
 
 Vec Triangle::get_pos()const {
-	// should return the center point of the triangle.
-	return Vec();
+	double height = abs(A.y - C.y);
+
+	return Vec(C.x, 0.5 * (height));
 }
 
 Vec Triangle::center_mass()const {
@@ -92,5 +113,10 @@ Vec Triangle::center_mass()const {
 }
 
 void Triangle::set_pos(const Vec pos) {
+	Vec diff = pos - this->get_pos();
+
+	this->A = A + diff;
+	this->B = B + diff;
+	this->C = C + diff;
 
 }

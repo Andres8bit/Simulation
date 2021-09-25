@@ -18,6 +18,7 @@ public:
     Sphere& operator=(const Sphere& other);
 
     //getters:
+    TYPE get_type() { return TYPE::SPHERE; }
     std::vector<Vec> vertices()const { std::vector<Vec> temp; temp.push_back(center); return temp; };
     Vec center_mass()const { return get_pos(); }
     Vec get_pos()const { return center; };

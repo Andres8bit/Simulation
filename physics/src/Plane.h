@@ -16,6 +16,7 @@ public:
     Plane& operator=(const Plane& other);
 
     //Getters:
+    TYPE get_type() { return TYPE::PLANE; }
     std::vector<Vec> vertices()const;
     Vec center_mass()const;
     // returns the upper left point

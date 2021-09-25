@@ -9,7 +9,6 @@ Sphere::Sphere(Vec center, float radius) {
 	ui.point.x = center.x;
 	ui.point.y = center.y;
 	ui.radiusX = ui.radiusY = radius;
-	this->type = TYPE::SPHERE;
 	color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 
@@ -19,7 +18,6 @@ Sphere::Sphere(float xpos, float ypos, float radius) {
 	ui.point.x = xpos;
 	ui.point.y = ypos;
 	ui.radiusX = ui.radiusY = radius;
-	this->type = TYPE::SPHERE;
 	color = D2D1::ColorF(D2D1::ColorF::Black, 1.0f);
 }
 Sphere::~Sphere()
@@ -63,7 +61,6 @@ void Sphere::copy(const Sphere& s){
 	set_mass(s.get_mass());
 	set_acc(s.get_acc());
 	set_vel(s.get_vel());
-	type = TYPE::SPHERE;
 }
 
 Bounds Sphere::bounds() {
