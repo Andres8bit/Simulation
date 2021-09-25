@@ -5,5 +5,4 @@
 	 this->acc = Vec();
 	this->vel = Vec();
 	this->angle_of_rotation = 0;
-	this->type = TYPE::BASE;
 };
