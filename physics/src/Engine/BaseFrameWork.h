@@ -1,6 +1,7 @@
 #pragma once
 #include<Windows.h>
 #include"Graphics.h"
+#include"Events.h"
 #include<timeapi.h>
 class BaseFrameWork
 {
@@ -10,7 +11,7 @@ public:
 	LRESULT msgHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	void renderScene();
 	void run(HWND windowHandle);
-	virtual void init(HWND hwnd) = 0;
+	virtual void init(HWND hwnd);
 	virtual void releaseAll() = 0;
 	virtual void resetAll() = 0;
 	//virtual void deleteAll();
@@ -20,6 +21,7 @@ public:
 	virtual void update() = 0;
 	virtual void render() = 0;
 protected:
+	Events* events;
 	Graphics* graphics;
 	HWND hwnd;
 	HRESULT result;

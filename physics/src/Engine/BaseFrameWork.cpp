@@ -4,6 +4,7 @@ BaseFrameWork::BaseFrameWork() {
     paused = false;
     graphics = NULL;
     initialized = false;
+    events = new Events();
 }
 
 BaseFrameWork::~BaseFrameWork() {
@@ -18,9 +19,46 @@ LRESULT BaseFrameWork::msgHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
             PostQuitMessage(0);
             return 0;
         case WM_KEYDOWN: case WM_SYSKEYDOWN:
+            events->keyDown(wParam);
+            return 0;
+        case WM_MOUSEMOVE:
+            events->mouseIn(lParam);
+            return 0;
+        case WM_INPUT:
+            events->mouseRawIn(lParam);
+            return 0;
+        case WM_LBUTTONDOWN:
+            events->setMouseL(true);
+            events->mouseIn(lParam);
+            return 0;
+        case WM_LBUTTONUP:
+            events->setMouseL(false);
+            events->mouseIn(lParam);
+            return 0;
+        case WM_MBUTTONDOWN:
+            events->setMouseMid(true);
+            events->mouseIn(lParam);
+            return 0;
+        case WM_MBUTTONUP:
+            events->setMouseMid(false);
+            events->mouseIn(lParam);
+            return 0;
+        case WM_RBUTTONUP:
+            events->setMouseR(false);
+            events->mouseIn(lParam);
+            return 0;
+        case WM_RBUTTONDOWN:
+            events->setMouseR(true);
+            events->mouseIn(lParam);
+            return 0;
+        case WM_XBUTTONDOWN: case WM_XBUTTONUP:
+            events->setMouseSecondary(wParam);
+            events->mouseIn(lParam);
             return 0;
         }
     }
+
+    return DefWindowProc(hwnd, msg, wParam, lParam);
 
 }
 
@@ -88,5 +126,19 @@ void BaseFrameWork::run(HWND windowHandle) {
        
     }
     render();
-    //clear inputs
+    events->clear(EventType::KEYS_PRESSED);
+}
+
+
+void BaseFrameWork::init(HWND windowHandle) {
+    hwnd = windowHandle;
+
+    graphics = new Graphics();
+    graphics->initilize(windowHandle, WINDOW_WIDTH, WINDOW_HEIGHT, FULLSCREEN);
+    events->init(windowHandle, false);
+
+    if (QueryPerformanceFrequency(&timerFreq) == false)
+        throw(GraphicsException(ErrorType::FATAL_ERROR));
+    QueryPerformanceCounter(&timeStart);
+    initialized = true;
 }
