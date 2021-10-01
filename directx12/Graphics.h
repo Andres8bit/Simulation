@@ -45,6 +45,7 @@ private:
 
 	D3D12_VIEWPORT	                  viewport;
 	D3D12_RECT                        canvas;
+	ComPtr<IDXGIFactory4>             factory;
 	ComPtr<IDXGISwapChain3>           swapChain;
 	ComPtr<ID3D12Device>              graphics_device;
 	ComPtr<ID3D12Resource>            renderTargets[FrameCount];
@@ -60,6 +61,7 @@ private:
 	HANDLE                            fenceEvent;
 	ComPtr<ID3D12Fence>               fence;
 	UINT64                            fenceVal;
+	UINT                              renderTargetDescriptorSize;
 
 
 	bool fullscreen;
@@ -70,4 +72,10 @@ private:
 	void PopulateCommandList();
 	void WaitForFrame();
 	void GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);
+	void CreateFactory();
+	void CreateHardwareAdapter();
+	void CreateCommandQueue();
+	void CreateSwapChain();
+	void CreateRenderTarget();
+	void CreateCommandAllocator();
 };
